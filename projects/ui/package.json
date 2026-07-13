@@ -1,0 +1,17 @@
+{
+  "name": "@springest/ui",
+  "version": "0.1.0",
+  "description": "Reusable Springest Angular UI components",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@ngx-translate/core": "^15.0.0",
+    "chart.js": "^4.5.0",
+    "primeng": "^21.1.0",
+    "rxjs": "^7.8.0"
+  },
+  "dependencies": { "tslib": "^2.6.2" },
+  "sideEffects": false
+}
