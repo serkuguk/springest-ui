@@ -1,4 +1,4 @@
-<div class="select_wrapper" [class.select_disabled]="isDisabled">
+<div class="select_wrapper" [class.select_disabled]="isDisabled()">
   <p-floatlabel>
     <p-select
       class="select"
@@ -8,9 +8,12 @@
       [resetFilterOnHide]="resetFilterOnHide()"
       [filter]="filter()"
       [showClear]="showClearState()"
-      [optionLabel]="'name'"
+      [optionLabel]="optionLabel()"
+      [optionValue]="optionValue()"
       [ngModel]="value()"
-      (onChange)="onChanged($event)">
+      (onChange)="onChanged($event)"
+      (onBlur)="touched.set(true)"
+      (onHide)="onClosed()">
       @if (showIcon()) {
         <ng-template #selectedItem let-selectedOption>
           <div class="flex items-center gap-2">

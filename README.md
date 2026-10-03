@@ -1,30 +1,27 @@
-# @springest/ui
+# springest
 
-Independent Angular 21 library with reusable standalone UI components.
+Independent Angular 21.2 UI library. Consumer documentation: [projects/ui/README.md](projects/ui/README.md).
 
-## Build
+## Build and check the package
 
-```bash
-pnpm install
+```sh
+pnpm install --frozen-lockfile
 pnpm build
+npm pack ./dist/ui --dry-run
+npm pack ./dist/ui
 ```
 
-## Install locally
+Test the generated archive in angular-core before publishing. Its Forms/Selectors integration tests exercise the packed select through PrimeNG and Signal Forms.
 
-Create the package archive:
+## Publish a public release
 
-```bash
-pnpm pack
+Publish the unscoped package `springest` from your personal npm account. Verify the account and enable 2FA in npm account settings.
+
+```sh
+npm login --registry=https://registry.npmjs.org/
+npm whoami
+npm publish ./dist/ui --access public
+npm view springest@0.1.1 version
 ```
 
-Install the generated `.tgz` in another Angular 21 project together with the peer dependencies:
-
-```bash
-npm install ../springest-ui/springest-ui-0.1.0.tgz primeng @ngx-translate/core chart.js
-```
-
-Angular, Angular Forms and RxJS are also peer dependencies and normally already exist in the consuming Angular application. Configure the PrimeNG theme there.
-
-```ts
-import { ButtonComponent, TableComponent } from '@springest/ui';
-```
+Publish only `dist/ui`, not this private workspace. Never commit credentials or a token to this repository. Update `projects/ui/package.json` to a new version before every later release; a published name/version cannot be overwritten. The current release is 0.1.1, licensed MIT.

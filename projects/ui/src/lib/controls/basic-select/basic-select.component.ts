@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, input, linkedSignal, model, output} from '@angular/core';
-import {FormsModule} from "@angular/forms";
-import {Select} from "primeng/select";
-import {FloatLabel} from "primeng/floatlabel";
-import {FormValueControl} from "@angular/forms/signals";
+import {FormsModule} from '@angular/forms';
+import {FormValueControl} from '@angular/forms/signals';
+import {FloatLabel} from 'primeng/floatlabel';
+import {Select, SelectChangeEvent} from 'primeng/select';
 
 @Component({
   selector: 'app-basic-select',
@@ -15,30 +15,32 @@ import {FormValueControl} from "@angular/forms/signals";
   styleUrl: './basic-select.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BasicSelectComponent implements FormValueControl<any | null> {
-  public items = input<any[]>();
-  public class = input<string>();
-  public disabledValue = input<any[]>([]);
-  public placeholder = input<string>("Select sum items...");
-  public lengthTextSelected = input<number>(20);
-  public filter = input<boolean>(false);
-  public emptyOption = input<boolean>(false);
-  public showClear = input<boolean>();
-  public withIcons = input<boolean>(false);
-  public resetFilterOnHide = input<boolean>(true);
-  public nullOrZero = input<number | null>(null);
-  public labelType = input<string>("in_label");
-  public showIcon = input<boolean>(false);
-  public changed = output<number | string>();
-  public showClearState = linkedSignal(() => this.showClear);
-  public isDisabled= input<boolean>(false);
-  public value = model<any[]>([]);
-  public touched = model<boolean>(false);
-  public closed = output<void>();
+export class BasicSelectComponent implements FormValueControl<unknown | null> {
+  public readonly items = input<unknown[]>();
+  public readonly class = input<string>();
+  public readonly disabledValue = input<unknown[]>([]);
+  public readonly placeholder = input<string>('Select sum items...');
+  public readonly lengthTextSelected = input<number>(20);
+  public readonly filter = input<boolean>(false);
+  public readonly emptyOption = input<boolean>(false);
+  public readonly showClear = input<boolean>();
+  public readonly withIcons = input<boolean>(false);
+  public readonly resetFilterOnHide = input<boolean>(true);
+  public readonly nullOrZero = input<number | null>(null);
+  public readonly labelType = input<string>('in_label');
+  public readonly showIcon = input<boolean>(false);
+  public readonly optionLabel = input<string>('name');
+  public readonly optionValue = input<string>();
+  public readonly changed = output<unknown | null>();
+  public readonly showClearState = linkedSignal(() => this.showClear());
+  public readonly isDisabled = input<boolean>(false);
+  public readonly value = model<unknown | null>(null);
+  public readonly touched = model<boolean>(false);
+  public readonly closed = output<void>();
 
-  onChanged(event: any | null): void {
-    this.value.set(event);
-    this.changed.emit(event);
+  onChanged({value}: SelectChangeEvent): void {
+    this.value.set(value);
+    this.changed.emit(value);
   }
 
   onClosed(): void {
