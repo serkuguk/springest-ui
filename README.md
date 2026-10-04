@@ -13,6 +13,8 @@ npm pack ./dist/ui
 
 Test the generated archive in angular-core before publishing. Its Forms/Selectors integration tests exercise the packed select through PrimeNG and Signal Forms.
 
+Run `pnpm check:toast` for the toast integration check. It reuses Jest and the zoneless test setup already installed in the sibling `../angular-core` project; it does not change that project or install dependencies.
+
 ## Publish a public release
 
 Publish the unscoped package `springest` from your personal npm account. Verify the account and enable 2FA in npm account settings.
@@ -21,7 +23,7 @@ Publish the unscoped package `springest` from your personal npm account. Verify 
 npm login --registry=https://registry.npmjs.org/
 npm whoami
 npm publish ./dist/ui --access public
-npm view springest@0.1.1 version
+npm view springest@0.2.0 version
 ```
 
-Publish only `dist/ui`, not this private workspace. Never commit credentials or a token to this repository. Update `projects/ui/package.json` to a new version before every later release; a published name/version cannot be overwritten. The current release is 0.1.1, licensed MIT.
+Publish only `dist/ui`, not this private workspace. Never commit credentials or a token to this repository. Update `projects/ui/package.json` to a new version before every later release; a published name/version cannot be overwritten. Version 0.2.0 is prepared locally; the previously published release is 0.1.1. Licensed MIT.

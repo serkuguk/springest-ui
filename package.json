@@ -2,6 +2,7 @@
   "name": "springest-ui-workspace",
   "private": true,
   "scripts": {
+    "check:toast": "node scripts/check-toast.cjs",
     "build": "ng build ui",
     "pack": "pnpm build && npm pack ./dist/ui"
   },

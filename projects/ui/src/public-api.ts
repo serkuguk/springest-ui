@@ -12,3 +12,5 @@ export * from './lib/controls/multi-select/multi-select.component';
 export * from './lib/controls/form-field/form-field.component';
 export * from './lib/controls/stepper';
 export * from './lib/types';
+export * from './lib/toast/toast.component';
+export * from './lib/toast/toast.service';
