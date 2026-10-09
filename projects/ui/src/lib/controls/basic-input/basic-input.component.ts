@@ -26,6 +26,7 @@ export class BasicInputComponent<T extends string | number | null = string> impl
     readonly readonly = input(false);
     readonly disabled = input(false);
     readonly autocomplete = input<string>();
+    readonly autocapitalize = input<string>();
     readonly lang = input<string>();
     readonly spellcheck = input<boolean>();
     readonly inputId = input(`springest-input-${++nextInputId}`);

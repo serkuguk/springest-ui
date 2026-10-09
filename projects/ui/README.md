@@ -5,7 +5,7 @@ Standalone UI components for Angular 21.2, PrimeNG 21 and Signal Forms.
 ## Install
 
 ```sh
-npm install springest@0.2.0 primeng@^21.1.0 @ngx-translate/core@^15.0.0 chart.js@^4.5.0
+npm install springest@0.2.1 primeng@^21.1.0 @ngx-translate/core@^15.0.0 chart.js@^4.5.0
 ```
 
 Angular common/core/forms (^21.2.0) and RxJS (^7.8.0) are peer dependencies and must be provided by the application. Angular Signal Forms are experimental in Angular 21; this package targets that version. Configure a PrimeNG theme in your application.
@@ -60,7 +60,15 @@ export class Editor {
 }
 ```
 
-Input `type` accepts `text` (default), `email`, `search`, or `number`. Text types emit strings; number emits `number | null`, with an empty field represented by `null`. Initialize numeric form/two-way values with `null` or a number. For two-way `[(value)]`, `min`, `max`, and `step` are native input attributes. With `[formField]`, configure `min`, `max`, and `maxLength` in the schema: Angular supplies them to the control and rejects simultaneous property bindings. `step` can still be supplied directly. Input also forwards `autocomplete`, `lang`, `spellcheck`, `readonly`, and both `disabled` and the existing `isDisabled`. The existing `placeholder` remains the fallback floating label when `label` is omitted.
+Input `type` accepts `text` (default), `email`, `search`, or `number`. Text types emit strings; number emits `number | null`, with an empty field represented by `null`. Initialize numeric form/two-way values with `null` or a number. For two-way `[(value)]`, `min`, `max`, and `step` are native input attributes. With `[formField]`, configure `min`, `max`, and `maxLength` in the schema: Angular supplies them to the control and rejects simultaneous property bindings. `step` can still be supplied directly. Input also forwards `autocomplete`, `autocapitalize`, `lang`, `spellcheck`, `readonly`, and both `disabled` and the existing `isDisabled`. The existing `placeholder` remains the fallback floating label when `label` is omitted.
+
+Import `PasswordInputComponent` for password fields. Its `autocomplete` reaches the native password input; choose `current-password` for sign-in or `new-password` for creating/changing a password. Disable automatic capitalization for identifiers with Input's `autocapitalize="off"`:
+
+```html
+<app-password-input autocomplete="current-password" [(value)]="password" />
+<app-password-input autocomplete="new-password" [(value)]="newPassword" />
+<app-basic-input label="Username" autocomplete="username" autocapitalize="off" [(value)]="username" />
+```
 
 FormField displays the first error after touch or when `submitted` is true. Angular `submit()` also marks invalid fields touched. Reset your `submitted` signal when starting a fresh form. Messages prefer `errorMessages` overrides, then the validator's `message`, then English defaults. The existing `ERRORS.FIELD_REQUIRED` translation is used when available. Override entries can be text or a function receiving the error parameters:
 
@@ -99,7 +107,8 @@ SegmentedControl selects one scalar value and defaults to `variant="segments"`. 
   <span>Save <strong>changes</strong></span>
 </app-button>
 
-<app-dialog [(visible)]="confirmVisible" header="Confirm changes">
+<app-dialog [(visible)]="confirmVisible" header="Confirm changes"
+  [closable]="!saving" [closeOnEscape]="!saving" [dismissableMask]="false" closeAriaLabel="Закрыть">
   <p>Apply these changes?</p>
   <div dialogActions>
     <app-button label="Cancel" (click)="confirmVisible = false" />
@@ -113,7 +122,7 @@ SegmentedControl selects one scalar value and defaults to `variant="segments"`. 
 
 Import `ButtonComponent`, `DialogComponent`, and `PaginationComponent`. Button projects nested content into its actual button and forwards its `aria` dictionary there. Loading shows the PrimeNG spinner, sets `aria-busy`, and disables activation; use an accessible name for icon-only buttons.
 
-Dialog is modal, closes with Escape or its close button, traps focus and restores the opener's focus. Background clicks do not dismiss it; dragging and resizing are disabled. The application supplies all action buttons through `[dialogActions]` and controls `visible`.
+Dialog is modal and traps focus, restoring the opener's focus after closing. `closable` and `closeOnEscape` default to true; `dismissableMask` defaults to false. Set `dismissableMask` to true to allow background dismissal. Set `closable` to false during saving to hide the close button and block Escape/background dismissal, including while the dialog is already open. `closeAriaLabel` supplies the close button's accessible name; leaving it unset preserves PrimeNG's existing default. Dragging and resizing are disabled. The application supplies all action buttons through `[dialogActions]` and controls `visible`; disable or guard its own Cancel action during saving too.
 
 Pagination defaults to `first = 0`, `rows = 10`, and `totalRecords = 0`. `first` is the record offset, and `page` in the exported `PaginatorState` event is zero-based. The component changes page state; the application loads or slices records.
 

@@ -25,7 +25,7 @@ Publish the unscoped package `springest` from your personal npm account. Verify 
 npm login --registry=https://registry.npmjs.org/
 npm whoami
 npm publish ./dist/ui --access public
-npm view springest@0.2.0 version
+npm view springest@0.2.1 version
 ```
 
-Publish only `dist/ui`, not this private workspace. Never commit credentials or a token to this repository. Update `projects/ui/package.json` to a new version before every later release; a published name/version cannot be overwritten. Version 0.2.0 is prepared locally; the previously published release is 0.1.1. Licensed MIT.
+Publish only `dist/ui`, not this private workspace. Never commit credentials or a token to this repository. Update `projects/ui/package.json` to a new version before every later release; a published name/version cannot be overwritten. Licensed MIT.

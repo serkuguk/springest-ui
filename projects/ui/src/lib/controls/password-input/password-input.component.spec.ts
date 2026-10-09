@@ -20,6 +20,19 @@ describe('PasswordInputComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('updates and removes autocomplete on the native password input', () => {
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    expect(input.hasAttribute('autocomplete')).toBe(false);
+    for (const value of ['current-password', 'new-password']) {
+      fixture.componentRef.setInput('autocomplete', value);
+      fixture.detectChanges();
+      expect(input.getAttribute('autocomplete')).toBe(value);
+    }
+    fixture.componentRef.setInput('autocomplete', undefined);
+    fixture.detectChanges();
+    expect(input.hasAttribute('autocomplete')).toBe(false);
+  });
 it('updates pasted input, emits changes and marks the actual input touched on blur', () => {
     const changed = jest.fn();
     component.changed.subscribe(changed);

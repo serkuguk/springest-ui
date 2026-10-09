@@ -41,6 +41,7 @@ export class PasswordInputComponent implements FormValueControl<string> {
     public labelType = input<string>("in_label");
     public toggleMask = input<boolean>(true);
     public feedback = input<boolean>(false);
+    public readonly autocomplete = input<string>();
     public isDisabled = input<boolean>(false);
     public readonly disabled = input<boolean>(false);
     public value = model<string>('');

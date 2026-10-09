@@ -49,4 +49,17 @@ describe('BasicInputComponent', () => {
     expect(input.getAttribute('aria-describedby')).toBe('hint');
     expect(fixture.nativeElement.querySelector('label').htmlFor).toBe('email');
   });
+
+  it('updates and removes autocapitalize on the native input', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    expect(input.hasAttribute('autocapitalize')).toBe(false);
+    for (const value of ['off', 'sentences']) {
+      fixture.componentRef.setInput('autocapitalize', value);
+      fixture.detectChanges();
+      expect(input.getAttribute('autocapitalize')).toBe(value);
+    }
+    fixture.componentRef.setInput('autocapitalize', undefined);
+    fixture.detectChanges();
+    expect(input.hasAttribute('autocapitalize')).toBe(false);
+  });
 });

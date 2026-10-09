@@ -151,21 +151,115 @@ describe('new library components', () => {
         fixture.detectChanges();
         const dialog = fixture.debugElement.children[0].componentInstance as Dialog;
         expect(dialog.focusTrap).toBe(true);
+        expect(dialog.closable).toBe(true);
+        expect(dialog.closeOnEscape).toBe(true);
         expect(dialog.dismissableMask).toBe(false);
+        expect(dialog.closeAriaLabel).toBeUndefined();
         const panel = fixture.debugElement.query(element => element.nativeElement.getAttribute?.('role') === 'dialog');
         // shortcut: jsdom has no layout or CSS motion; simulate visibility/events here and use a browser for layout checks.
         const closeButton = panel.nativeElement.querySelector('button') as HTMLButtonElement;
         Object.defineProperty(closeButton, 'offsetParent', {value: panel.nativeElement});
-        panel.triggerEventHandler('pMotionOnBeforeEnter', {element: panel.nativeElement});
+        expect(dialog.container()).toBe(panel.nativeElement);
         panel.triggerEventHandler('pMotionOnAfterEnter', {});
         jest.advanceTimersByTime(200);
         expect(panel.nativeElement.contains(document.activeElement)).toBe(true);
+        panel.nativeElement.parentElement.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+        expect(fixture.componentInstance.visible()).toBe(true);
         closeButton.click();
         fixture.detectChanges();
         expect(fixture.componentInstance.visible()).toBe(false);
         panel.triggerEventHandler('pMotionOnAfterLeave', {});
         expect(document.activeElement).toBe(opener);
         opener.remove();
+    });
+
+    it('updates the real close button accessible name and hides it while locked', () => {
+        const fixture = TestBed.createComponent(DialogComponent);
+        fixture.componentRef.setInput('closeAriaLabel', 'Закрыть окно');
+        fixture.componentInstance.visible.set(true);
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.p-dialog-close-button').getAttribute('aria-label')).toBe('Закрыть окно');
+        fixture.componentRef.setInput('closeAriaLabel', 'Закрыть');
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.p-dialog-close-button').getAttribute('aria-label')).toBe('Закрыть');
+        fixture.componentRef.setInput('closeAriaLabel', undefined);
+        fixture.detectChanges();
+        expect(fixture.debugElement.children[0].componentInstance.closeAriaLabel).toBeUndefined();
+        expect(fixture.nativeElement.querySelector('.p-dialog-close-button').hasAttribute('aria-label')).toBe(false);
+        fixture.componentRef.setInput('closable', false);
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.p-dialog-close-button')).toBeNull();
+    });
+
+    it.each(['closable', 'closeOnEscape'] as const)('updates Escape handling when %s changes while open', async option => {
+        const fixture = TestBed.createComponent(DialogComponent);
+        fixture.autoDetectChanges();
+        fixture.componentInstance.visible.set(true);
+        fixture.detectChanges();
+        const panel = fixture.debugElement.query(element => element.nativeElement.getAttribute?.('role') === 'dialog');
+        const dialog = fixture.debugElement.children[0].componentInstance as Dialog;
+        expect(dialog.container()).toBe(panel.nativeElement);
+        panel.triggerEventHandler('pMotionOnAfterEnter', {});
+        fixture.componentRef.setInput(option, false);
+        fixture.detectChanges();
+        TestBed.tick();
+        await fixture.whenStable();
+        document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+        expect(fixture.componentInstance.visible()).toBe(true);
+        fixture.componentRef.setInput(option, true);
+        fixture.detectChanges();
+        TestBed.tick();
+        await fixture.whenStable();
+        document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+        expect(fixture.componentInstance.visible()).toBe(false);
+        panel.triggerEventHandler('pMotionOnAfterLeave', {});
+    });
+
+    it.each(['closable', 'dismissableMask'] as const)('updates mask handling when %s changes while open', async option => {
+        const fixture = TestBed.createComponent(DialogComponent);
+        fixture.autoDetectChanges();
+        fixture.componentRef.setInput('dismissableMask', true);
+        fixture.componentInstance.visible.set(true);
+        fixture.detectChanges();
+        const panel = fixture.debugElement.query(element => element.nativeElement.getAttribute?.('role') === 'dialog');
+        const dialog = fixture.debugElement.children[0].componentInstance as Dialog;
+        expect(dialog.container()).toBe(panel.nativeElement);
+        panel.triggerEventHandler('pMotionOnAfterEnter', {});
+        const mask = panel.nativeElement.parentElement as HTMLElement;
+        fixture.componentRef.setInput(option, false);
+        fixture.detectChanges();
+        TestBed.tick();
+        await fixture.whenStable();
+        mask.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+        expect(fixture.componentInstance.visible()).toBe(true);
+        fixture.componentRef.setInput(option, true);
+        fixture.detectChanges();
+        TestBed.tick();
+        await fixture.whenStable();
+        mask.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+        expect(fixture.componentInstance.visible()).toBe(false);
+        panel.triggerEventHandler('pMotionOnAfterLeave', {});
+    });
+
+    it('cleans closing listeners when dismissal is disabled and visibility closes in the same render', async () => {
+        const fixture = TestBed.createComponent(DialogComponent);
+        fixture.autoDetectChanges();
+        fixture.componentRef.setInput('dismissableMask', true);
+        fixture.componentInstance.visible.set(true);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const dialog = fixture.debugElement.children[0].componentInstance as Dialog;
+        expect(dialog.maskClickListener).not.toBeNull();
+        fixture.componentRef.setInput('dismissableMask', false);
+        fixture.componentInstance.visible.set(false);
+        fixture.detectChanges();
+        TestBed.tick();
+        await fixture.whenStable();
+        expect(dialog.maskClickListener).toBeNull();
+        expect(dialog.documentEscapeListener).toBeNull();
+        fixture.destroy();
+        expect(dialog.maskClickListener).toBeNull();
+        expect(dialog.documentEscapeListener).toBeNull();
     });
 
     it('updates paginator models and emits the unmodified PrimeNG state', () => {

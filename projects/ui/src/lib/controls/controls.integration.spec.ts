@@ -16,7 +16,7 @@ import {
   template: `
     <span id="hint">Helpful description</span>
     <app-form-field data-control="text" [field]="fields.text" label="Name" [showLabel]="true" [submitted]="submitted()">
-      <app-basic-input [formField]="fields.text" ariaDescribedBy="hint" (changed)="textChanged = $event" />
+      <app-basic-input [formField]="fields.text" [autocapitalize]="'off'" ariaDescribedBy="hint" (changed)="textChanged = $event" />
     </app-form-field>
     <app-form-field data-control="number" [field]="fields.amount" label="Amount" [showLabel]="true" [submitted]="submitted()">
       <app-basic-input type="number" [formField]="fields.amount" [step]="0.5"
@@ -46,7 +46,7 @@ import {
       <app-multi-select [formField]="fields.many" [items]="items" />
     </app-form-field>
     <app-form-field data-control="password" [field]="fields.password" label="Password" [showLabel]="true" [submitted]="submitted()">
-      <app-password-input [formField]="fields.password" />
+      <app-password-input [formField]="fields.password" [autocomplete]="'current-password'" />
     </app-form-field>
     <app-form-field data-control="checkbox" [field]="fields.checked" label="Checked" [showLabel]="true" [submitted]="submitted()">
       <app-checkbox [formField]="fields.checked" />
@@ -55,7 +55,8 @@ import {
       <global-calendar [formField]="fields.date" />
     </app-form-field>
     <app-button [loading]="busy()" [aria]="{'aria-label': 'Save'}"><span>Save form</span></app-button>
-    <app-dialog [(visible)]="visible" header="Confirm"><p>Body</p><app-button dialogActions label="Done" (click)="visible.set(false)" /></app-dialog>
+    <app-dialog [(visible)]="visible" header="Confirm" [closable]="true" [closeOnEscape]="true"
+      [dismissableMask]="false" [closeAriaLabel]="'Закрыть'"><p>Body</p><app-button dialogActions label="Done" (click)="visible.set(false)" /></app-dialog>
     <app-pagination [(first)]="first" [(rows)]="rows" [totalRecords]="25" [rowsPerPageOptions]="[10, 20]" />
   `,
 })

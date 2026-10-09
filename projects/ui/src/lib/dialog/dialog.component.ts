@@ -1,6 +1,6 @@
 import {DOCUMENT} from '@angular/common';
-import {ChangeDetectionStrategy, Component, effect, inject, input, model} from '@angular/core';
-import {DialogModule} from 'primeng/dialog';
+import {afterRenderEffect, ChangeDetectionStrategy, Component, effect, inject, input, model, viewChild} from '@angular/core';
+import {Dialog, DialogModule} from 'primeng/dialog';
 
 @Component({
     selector: 'app-dialog',
@@ -8,7 +8,8 @@ import {DialogModule} from 'primeng/dialog';
     imports: [DialogModule],
     template: `
         <p-dialog [visible]="visible()" (visibleChange)="visible.set($event)" [header]="header()"
-            [modal]="true" [closeOnEscape]="true" [closable]="true" [dismissableMask]="false"
+            [modal]="true" [closeOnEscape]="closeOnEscape()" [closable]="closable()" [dismissableMask]="dismissableMask()"
+            [closeAriaLabel]="closeAriaLabel()"
             [draggable]="false" [resizable]="false" [focusTrap]="true" (onHide)="restoreFocus()">
             <ng-content />
             <ng-template #footer><ng-content select="[dialogActions]" /></ng-template>
@@ -19,12 +20,33 @@ import {DialogModule} from 'primeng/dialog';
 export class DialogComponent {
     private readonly document = inject(DOCUMENT);
     private opener: HTMLElement | null = null;
+    private readonly dialog = viewChild(Dialog);
     readonly visible = model(false);
     readonly header = input('');
+    readonly closable = input(true);
+    readonly closeOnEscape = input(true);
+    readonly dismissableMask = input(false);
+    readonly closeAriaLabel = input<string>();
 
     constructor() {
         effect(() => {
             if (this.visible()) this.opener = this.document.activeElement as HTMLElement | null;
+        });
+        afterRenderEffect(onCleanup => {
+            const dialog = this.dialog();
+            const closable = this.closable();
+            const closeOnEscape = this.closeOnEscape();
+            const dismissableMask = this.dismissableMask();
+            if (!this.visible() || !dialog?.container() || !dialog.wrapper) return;
+            // shortcut: PrimeNG 21 snapshots closing options on entry; remove rebinding when upstream handles live changes.
+            dialog.unbindDocumentEscapeListener();
+            dialog.unbindMaskClickListener();
+            if (closable && closeOnEscape) dialog.bindDocumentEscapeListener();
+            if (closable && dismissableMask) dialog.enableModality();
+            onCleanup(() => {
+                dialog.unbindDocumentEscapeListener();
+                dialog.unbindMaskClickListener();
+            });
         });
     }
 
