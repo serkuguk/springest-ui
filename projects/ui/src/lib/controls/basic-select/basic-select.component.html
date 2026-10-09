@@ -1,9 +1,14 @@
-<div class="select_wrapper" [class.select_disabled]="isDisabled()">
+<div class="select_wrapper" [class.select_disabled]="isDisabled() || disabled() || readonly()">
   <p-floatlabel>
     <p-select
       class="select"
       [options]="items()"
-      [disabled]="isDisabled()"
+      [disabled]="isDisabled() || disabled() || readonly()"
+      [readonly]="readonly()"
+      [inputId]="effectiveId()"
+      [ariaLabel]="ariaLabel()"
+      [ariaLabelledBy]="labelledBy()"
+      [pt]="passThrough()"
       [placeholder]="placeholder()"
       [resetFilterOnHide]="resetFilterOnHide()"
       [filter]="filter()"
@@ -31,6 +36,6 @@
         </ng-template>
       }
     </p-select>
-    <label [for]="labelType()">{{placeholder()}}</label>
+    <label [for]="effectiveId()">{{placeholder()}}</label>
   </p-floatlabel>
 </div>

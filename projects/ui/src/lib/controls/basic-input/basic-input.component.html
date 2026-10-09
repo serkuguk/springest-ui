@@ -1,15 +1,27 @@
 <div class="basic-input">
   <p-floatlabel>
     <input
-      type="text"
+      [type]="type()"
       pInputText
       class="app-input"
-      [disabled]="isDisabled()"
-      (keyup)="onKeyup($event)"
+      [id]="effectiveId()"
+      [disabled]="isDisabled() || disabled()"
+      [readOnly]="readonly()"
+      [attr.min]="min()"
+      [attr.max]="max()"
+      [attr.step]="step()"
+      [attr.autocomplete]="autocomplete()"
+      [attr.lang]="lang()"
+      [attr.spellcheck]="spellcheck()"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-labelledby]="formField ? formField.labelledBy(ariaLabelledBy()) : ariaLabelledBy()"
+      [attr.aria-describedby]="formField ? formField.describedBy(ariaDescribedBy()) : ariaDescribedBy()"
+      [attr.aria-invalid]="formField ? formField.hasError() : ariaInvalid()"
+      (input)="onInput($event)"
       (blur)="onBlur()"
       [value]="value()"
     />
-    <label for="labelType()">{{placeholder()}}</label>
+    <label [for]="effectiveId()">{{label() ?? placeholder()}}</label>
   </p-floatlabel>
 </div>
 

@@ -15,6 +15,8 @@ Test the generated archive in angular-core before publishing. Its Forms/Selector
 
 Run `pnpm check:toast` for the toast integration check. It reuses Jest and the zoneless test setup already installed in the sibling `../angular-core` project; it does not change that project or install dependencies.
 
+Run `npm run check:ui` for strict Angular consumer-template compilation and the affected controls, Button, Dialog, Pagination and Toast tests. This uses the same sibling Jest setup.
+
 ## Publish a public release
 
 Publish the unscoped package `springest` from your personal npm account. Verify the account and enable 2FA in npm account settings.

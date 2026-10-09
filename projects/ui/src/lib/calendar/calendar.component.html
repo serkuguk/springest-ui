@@ -3,14 +3,19 @@
     <p-datepicker
          [ngModel]="value()"
          (ngModelChange)="onChanged($event)"
-         [inputId]="'calendar_' + (placeholder() || 'on_label')"
+         [inputId]="effectiveId()"
+         [readonlyInput]="readonly()"
+         [showOnFocus]="!readonly()"
+         [ariaLabel]="ariaLabel()"
+         [ariaLabelledBy]="labelledBy()"
+         [pt]="passThrough()"
          showIcon
          iconDisplay="input"
          [minDate]="minDate()"
          [maxDate]="maxDate()"
-         [disabled]="disabled()"
+         [disabled]="disabled() || readonly()"
          (onBlur)="onClosed()"
     ></p-datepicker>
-    <label>{{ placeholder() || 'On Label' }}</label>
+    <label [for]="effectiveId()">{{ placeholder() || 'On Label' }}</label>
   </p-floatlabel>
 </div>

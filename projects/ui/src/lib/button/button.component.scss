@@ -6,6 +6,14 @@
   display: inline-flex;
 }
 
+:host ::ng-deep .default-button__content:empty {
+  display: none;
+}
+
+:host ::ng-deep .default-button_vertical .p-button:has(.default-button__content:not(:empty)) {
+  flex-direction: column;
+}
+
 :host ::ng-deep .p-button {
   width: auto;
   min-width: 8rem;
@@ -35,7 +43,7 @@
   color: #64748b;
 }
 
-:host ::ng-deep .p-button.p-button-icon-only {
+:host ::ng-deep .p-button.p-button-icon-only:not(:has(.default-button__content:not(:empty))) {
   min-width: 2.5rem;
   width: 2.5rem;
   height: 2.5rem;
@@ -46,7 +54,7 @@
   box-shadow: none;
 }
 
-:host ::ng-deep .p-button.p-button-icon-only:not(:disabled):hover {
+:host ::ng-deep .p-button.p-button-icon-only:not(:has(.default-button__content:not(:empty))):not(:disabled):hover {
   background: #eff6ff;
   border-color: #93c5fd;
   color: #1d4ed8;

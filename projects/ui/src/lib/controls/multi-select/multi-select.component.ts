@@ -3,14 +3,20 @@ import {
   Component,
   computed,
   effect,
+  inject,
   input,
   model,
   output
 } from '@angular/core';
-import {MultiSelect} from "primeng/multiselect";
+import {MultiSelect, MultiSelectPassThrough} from "primeng/multiselect";
+import {PassThroughOption} from 'primeng/api';
 import {FormControl, ReactiveFormsModule} from "@angular/forms";
 import {FormValueControl} from "@angular/forms/signals";
 import {ControlItemInterface, Value} from '../../types';
+
+import {FormFieldComponent} from '../form-field/form-field.component';
+
+let nextId = 0;
 
 @Component({
   selector: 'app-multi-select',
@@ -21,6 +27,23 @@ import {ControlItemInterface, Value} from '../../types';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MultiSelectComponent implements FormValueControl<Value[]> {
+
+    protected readonly formField = inject(FormFieldComponent, {optional: true});
+    public readonly readonly = input<boolean>(false);
+    public readonly inputId = input<string>(`app-multiselect-${++nextId}`);
+    public readonly ariaLabel = input<string>();
+    public readonly ariaLabelledBy = input<string>();
+    public readonly ariaDescribedBy = input<string>();
+    public readonly ariaInvalid = input<boolean>(false);
+    protected readonly effectiveId = computed(() => this.formField?.controlId() ?? this.inputId());
+    protected readonly labelledBy = computed(() => this.formField?.labelledBy(this.ariaLabelledBy()) ?? this.ariaLabelledBy());
+    protected readonly inputAria = computed(() => ({
+        'aria-describedby': this.formField?.describedBy(this.ariaDescribedBy()) ?? this.ariaDescribedBy(),
+        'aria-invalid': this.formField ? this.formField.hasError() : this.ariaInvalid()
+    }));
+    // shortcut: PrimeNG 21 omits its runtime hiddenInput PT key from types; remove the extension when declared upstream.
+    protected readonly passThrough = computed<MultiSelectPassThrough & {hiddenInput: PassThroughOption<HTMLInputElement>}>(() => ({hiddenInput: this.inputAria()}));
+
 
   public items = input<ControlItemInterface[]>([]);
   public disabledValue = input<any[]>([]);
@@ -58,7 +81,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
     });
 
     effect(() => {
-      if (this.disabled()) {
+      if (this.disabled() || this.readonly()) {
         this.multiSelectControl.disable({emitEvent: false});
         return;
       }
@@ -72,6 +95,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
   }
 
   onChanged(event: { value: Value[] }): void {
+    if (this.disabled() || this.readonly()) return;
     const nextValue = event.value ?? [];
     this.multiSelectControl.setValue(nextValue, {emitEvent: false});
     this.value.set(nextValue);

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {ButtonModule} from "primeng/button";
 
 export type ButtonType = 'button' | 'submit';
@@ -14,17 +14,18 @@ export type badgeSeverityType = 'info' | 'success' | 'warn' | 'danger' | 'second
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ButtonComponent {
-    type = input<ButtonType>('button');
-    className = input<string>();
-    style = input<Record<string, string | number>>();
-    label = input<string>();
-    iconPos = input<ButtonIconPosition>('left');
-    styleClass = input<string>();
-    icon = input<string>();
-    disabled = input<boolean>(false);
-    rounded = input<boolean>(false);
-    badgeSeverity = input<badgeSeverityType>('warn');
-    size = input<ButtonSizeType>('small');
-    loading = input<boolean>(false);
+    readonly type = input<ButtonType>('button');
+    readonly className = input<string>();
+    readonly style = input<Record<string, string | number>>();
+    readonly label = input<string>();
+    readonly iconPos = input<ButtonIconPosition>('left');
+    readonly styleClass = input<string>();
+    readonly icon = input<string>();
+    readonly disabled = input<boolean>(false);
+    readonly rounded = input<boolean>(false);
+    readonly badgeSeverity = input<badgeSeverityType>('warn');
+    readonly size = input<ButtonSizeType>('small');
+    readonly loading = input<boolean>(false);
+    readonly aria = input<Record<string, string | number | boolean>>({});
+    readonly passThrough = computed(() => ({root: {...this.aria(), 'aria-busy': this.loading() ? 'true' : undefined}}));
 }
-

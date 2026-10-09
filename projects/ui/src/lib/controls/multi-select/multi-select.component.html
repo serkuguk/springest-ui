@@ -1,5 +1,10 @@
 <div class="multiselect">
   <p-multiSelect
+    [inputId]="effectiveId()"
+    [readonly]="readonly()"
+    [ariaLabel]="ariaLabel() || placeholder()"
+    [ariaLabelledBy]="labelledBy()"
+    [pt]="passThrough()"
     [options]="items()"
     [optionLabel]="'label'"
     [optionValue]="'value'"

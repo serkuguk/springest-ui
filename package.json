@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "check:toast": "node scripts/check-toast.cjs",
+    "check:ui": "node scripts/check-toast.cjs --ui --typecheck",
     "build": "ng build ui",
     "pack": "pnpm build && npm pack ./dist/ui"
   },

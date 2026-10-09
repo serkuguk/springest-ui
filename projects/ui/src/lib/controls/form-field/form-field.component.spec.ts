@@ -1,96 +1,80 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormFieldComponent } from './form-field.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {signal} from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
-import {TranslateModule} from "@ngx-translate/core";
-import {ChangeDetectorRef} from "@angular/core";
+import {FormFieldComponent} from './form-field.component';
 
 describe('FormFieldComponent', () => {
-  let component: FormFieldComponent;
   let fixture: ComponentFixture<FormFieldComponent>;
-
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        FormFieldComponent,
-        TranslateModule.forRoot() ],
-    });
-
+    TestBed.configureTestingModule({imports: [FormFieldComponent]});
     fixture = TestBed.createComponent(FormFieldComponent);
-    component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    fixture.componentRef.setInput('control', new FormControl());
+  it('renders errors only after touch or submission and clears them after reset', () => {
+    const control = new FormControl('', Validators.required);
+    fixture.componentRef.setInput('field', control);
     fixture.detectChanges();
-    expect(component).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.form-field__error')).toBeNull();
+    control.markAsTouched();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.form-field__error').textContent).toBe('Required field');
+    control.reset();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.form-field__error')).toBeNull();
+    fixture.componentRef.setInput('submitted', true);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.hasError()).toBe(true);
+    control.setValue('valid');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.form-field__error')).toBeNull();
   });
 
-  describe('hasError()', () => {
-    it('should return TRUE when control is invalid and touched', () => {
-      const testControl = new FormControl('', Validators.required);
-      testControl.markAsTouched();
-
-      fixture.componentRef.setInput('control', testControl);
-      fixture.detectChanges();
-
-      expect(component.hasError()).toBe(true);
-    });
-
-    it('should return FALSE when control is invalid but NOT touched', () => {
-      const testControl = new FormControl('', Validators.required);
-      fixture.componentRef.setInput('control', testControl);
-      fixture.detectChanges();
-
-      expect(component.hasError()).toBe(false);
-    });
-
-    it('should return FALSE when control is valid and touched', () => {
-      const testControl = new FormControl('some value', Validators.required);
-      fixture.componentRef.setInput('control', testControl);
-      fixture.detectChanges();
-
-      expect(component.hasError()).toBe(false);
-    });
+  it('releases old control events when field is replaced and on destruction', () => {
+    const first = new FormControl('');
+    const second = new FormControl('');
+    const subscribe = jest.spyOn(first.events, 'subscribe');
+    fixture.componentRef.setInput('field', first);
+    fixture.detectChanges();
+    const subscription = subscribe.mock.results[0].value;
+    fixture.componentRef.setInput('field', second);
+    fixture.detectChanges();
+    expect(subscription.closed).toBe(true);
+    const secondSubscribe = jest.spyOn(second.events, 'subscribe');
+    fixture.componentRef.setInput('field', first);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('field', second);
+    fixture.detectChanges();
+    const secondSubscription = secondSubscribe.mock.results[0].value;
+    fixture.destroy();
+    expect(secondSubscription.closed).toBe(true);
   });
 
-  describe('errorKey getter', () => {
-    it('should return the error key when control has an error', () => {
-      const testControl = new FormControl('', Validators.required);
-      fixture.componentRef.setInput('control', testControl);
-      fixture.detectChanges();
-
-      expect(component.errorKey).toBe('required');
-    });
-
-    it('should return "pattern" for a pattern error', () => {
-      const testControl = new FormControl('invalid-value', Validators.pattern('[0-9]+'));
-      fixture.componentRef.setInput('control', testControl);
-      fixture.detectChanges();
-
-      expect(component.errorKey).toBe('pattern');
-    });
-
-    it('should return null when control is valid', () => {
-      const testControl = new FormControl('valid value');
-      fixture.componentRef.setInput('control', testControl);
-      fixture.detectChanges();
-
-      expect(component.errorKey).toBeNull();
-    });
+  it('uses Signal Forms length parameters, message and override precedence', () => {
+    const errors = signal([{kind: 'minLength', minLength: 8, message: ''}]);
+    fixture.componentRef.setInput('field', () => ({invalid: signal(true), touched: signal(true), errors}));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.errorMessage).toBe('At least 8 characters');
+    errors.set([{kind: 'minLength', minLength: 8, message: 'Validator message'}]);
+    expect(fixture.componentInstance.errorMessage).toBe('Validator message');
+    fixture.componentRef.setInput('errorMessages', {minLength: (error: Record<string, unknown>) => `Minimum ${error['minLength']}`});
+    fixture.detectChanges();
+    expect(fixture.componentInstance.errorMessage).toBe('Minimum 8');
   });
 
-  describe('Test effect', () => {
-    it('should react to control value changes and trigger markForCheck', () => {
-      const cdr = fixture.debugElement.injector.get(ChangeDetectorRef);
-      const markForCheckSpy = jest.spyOn(cdr, 'markForCheck');
-
-      const testControl = new FormControl('');
-      fixture.componentRef.setInput('control', testControl);
-      fixture.detectChanges();
-      markForCheckSpy.mockClear();
-
-      testControl.setValue('new value');
-      expect(markForCheckSpy).toHaveBeenCalled();
-    });
+  it('supports reactive length errors and merges unique accessible IDs', () => {
+    const control = new FormControl('a', Validators.minLength(8));
+    control.markAsTouched();
+    fixture.componentRef.setInput('field', control);
+    fixture.componentRef.setInput('showLabel', true);
+    fixture.componentRef.setInput('label', 'Name');
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(component.errorMessage).toBe('At least 8 characters');
+    expect(component.describedBy(`hint hint ${component.errorId()}`)).toBe(`hint ${component.errorId()}`);
+    expect(component.labelledBy('external')).toBe(`external ${component.labelId()}`);
+    expect(fixture.nativeElement.querySelector('label').htmlFor).toBe(component.controlId());
+    const other = TestBed.createComponent(FormFieldComponent);
+    other.componentRef.setInput('field', new FormControl());
+    expect(other.componentInstance.controlId()).not.toBe(component.controlId());
   });
 });

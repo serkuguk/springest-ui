@@ -4,10 +4,14 @@
         [binary]="binary()"
         [disabled]="disabled()"
         [readonly]="readonly()"
+        [inputId]="effectiveId()"
+        [ariaLabel]="ariaLabel()"
+        [ariaLabelledBy]="labelledBy()"
+        [pt]="passThrough()"
         (ngModelChange)="onValueChange($event)"
         (onBlur)="onBlur()"
     />
     @if (label()) {
-        <label class="checkbox-label">{{ label() }}</label>
+        <label class="checkbox-label" [for]="effectiveId()">{{ label() }}</label>
     }
 </div>

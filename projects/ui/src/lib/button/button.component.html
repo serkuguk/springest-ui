@@ -1,15 +1,19 @@
-<div class="default-button">
+<div class="default-button" [class.default-button_vertical]="iconPos() === 'top' || iconPos() === 'bottom'">
   <p-button
        [class]="className()"
        [type]="type()"
        [label]="label()"
        [style]="style()"
-       [disabled]="disabled()"
+       [disabled]="disabled() || loading()"
+       [loading]="loading()"
+       [rounded]="rounded()"
+       [pt]="passThrough()"
        [icon]="icon()"
        [size]="size()"
        [iconPos]="iconPos()"
        [styleClass]="styleClass()"
        [badgeSeverity]="badgeSeverity()"
   >
+    <span class="default-button__content" [style.order]="iconPos() === 'left' || iconPos() === 'top' ? 1 : -1"><ng-content></ng-content></span>
   </p-button>
 </div>
