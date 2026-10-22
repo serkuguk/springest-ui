@@ -38,6 +38,7 @@ export class CalendarComponent implements FormValueControl<Date | null> {
     public minDate = input<Date>();
     public disabled = input<boolean>(false);
     public touched = model<boolean>(false);
+    public readonly touch = output<void>();
     public value = model<Date | null>(null);
     public changed = output<Date | null>();
     public closed = output<void>();
@@ -49,6 +50,7 @@ export class CalendarComponent implements FormValueControl<Date | null> {
 
     onClosed(): void {
         this.touched.set(true);
+        this.touch.emit();
         this.closed.emit();
     }
 }

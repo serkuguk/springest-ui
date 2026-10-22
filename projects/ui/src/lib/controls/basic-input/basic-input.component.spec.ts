@@ -12,13 +12,19 @@ describe('BasicInputComponent', () => {
   it('emits input changes and marks blur as touched', () => {
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     const changed = jest.fn();
+    const touch = jest.fn();
+    const touchedChange = jest.fn();
     fixture.componentInstance.changed.subscribe(changed);
+    fixture.componentInstance.touch.subscribe(touch);
+    fixture.componentInstance.touched.subscribe(touchedChange);
     input.value = 'Pasted value';
     input.dispatchEvent(new Event('input'));
     expect(fixture.componentInstance.value()).toBe('Pasted value');
     expect(changed).toHaveBeenCalledWith('Pasted value');
     input.dispatchEvent(new Event('blur'));
     expect(fixture.componentInstance.touched()).toBe(true);
+    expect(touch).toHaveBeenCalledTimes(1);
+    expect(touchedChange).toHaveBeenCalledWith(true);
   });
 
   it('uses native numeric values and returns null for an empty or invalid number', () => {

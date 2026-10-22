@@ -51,11 +51,11 @@ const config = {
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   modulePaths: [path.join(consumerRoot, 'node_modules')],
   moduleNameMapper: Object.fromEntries(
-    ['core', 'common', 'compiler', 'platform-browser', 'platform-browser-dynamic', 'forms'].flatMap(name => {
+    ['core', 'common', 'compiler', 'platform-browser', 'forms', 'router'].flatMap(name => {
       const packageName = `@angular/${name}`;
-      return Object.keys(consumerRequire(`${packageName}/package.json`).exports).filter(entry => !entry.includes('*')).map(entry => {
+      return Object.keys(require(`${packageName}/package.json`).exports).filter(entry => !entry.includes('*')).map(entry => {
         const specifier = packageName + (entry === '.' ? '' : entry.slice(1));
-        return [`^${specifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, consumerRequire.resolve(specifier)];
+        return [`^${specifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, require.resolve(specifier)];
       });
     }),
   ),

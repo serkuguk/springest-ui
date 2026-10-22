@@ -57,6 +57,7 @@ export class BasicSelectComponent implements FormValueControl<unknown | null> {
     public readonly disabled = input<boolean>(false);
   public readonly value = model<unknown | null>(null);
   public readonly touched = model<boolean>(false);
+  public readonly touch = output<void>();
   public readonly closed = output<void>();
 
   onChanged({value}: SelectChangeEvent): void {
@@ -67,6 +68,7 @@ export class BasicSelectComponent implements FormValueControl<unknown | null> {
 
   onClosed(): void {
     this.touched.set(true);
+    this.touch.emit();
     this.closed.emit();
   }
 }

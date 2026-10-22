@@ -25,6 +25,7 @@ export interface ChartAxisOptions {
 }
 
 export interface ChartScaleOptions {
+  [axis: string]: ChartAxisOptions | undefined;
   x?: ChartAxisOptions;
   y?: ChartAxisOptions;
 }

@@ -46,6 +46,7 @@ export class PasswordInputComponent implements FormValueControl<string> {
     public readonly disabled = input<boolean>(false);
     public value = model<string>('');
     public touched = model<boolean>(false);
+    public readonly touch = output<void>();
     public changed = output<string>();
 
     onInput(event: Event): void {
@@ -56,5 +57,6 @@ export class PasswordInputComponent implements FormValueControl<string> {
 
     onBlur(): void {
         this.touched.set(true);
+        this.touch.emit();
     }
 }

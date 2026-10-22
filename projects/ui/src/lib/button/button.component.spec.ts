@@ -1,5 +1,7 @@
 import {Component, signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {Button} from 'primeng/button';
 import {ButtonComponent} from './button.component';
 
 @Component({imports: [ButtonComponent], template: '<form (submit)="submitted = true; $event.preventDefault()"><app-button type="submit" icon="pi pi-save" [loading]="loading()" [aria]="aria" [rounded]="true" (click)="clicked = true"><strong>Details</strong></app-button></form>'})
@@ -11,6 +13,14 @@ class ButtonHost {
 }
 
 describe('ButtonComponent', () => {
+  it.each([['help', 'info'], ['primary', null], ['success', 'success']])('adapts legacy badge severity %s for PrimeNG 22', (severity, expected) => {
+    const fixture = TestBed.createComponent(ButtonComponent);
+    fixture.componentRef.setInput('badgeSeverity', severity);
+    fixture.detectChanges();
+    const button: Button = fixture.debugElement.query(By.directive(Button)).componentInstance;
+    expect(button.badgeSeverity()).toBe(expected);
+  });
+
   it('projects markup, forwards ARIA and blocks activation while loading', () => {
     TestBed.configureTestingModule({imports: [ButtonHost]});
     const fixture = TestBed.createComponent(ButtonHost);

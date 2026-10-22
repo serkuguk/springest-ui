@@ -17,7 +17,7 @@
       [optionValue]="optionValue()"
       [ngModel]="value()"
       (onChange)="onChanged($event)"
-      (onBlur)="touched.set(true)"
+      (onBlur)="touched.set(true); touch.emit()"
       (onHide)="onClosed()">
       @if (showIcon()) {
         <ng-template #selectedItem let-selectedOption>

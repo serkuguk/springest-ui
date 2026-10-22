@@ -1,6 +1,6 @@
 # springest
 
-Independent Angular 21.2 UI library. Consumer documentation: [projects/ui/README.md](projects/ui/README.md).
+Independent Angular 22.2 UI library. Consumer documentation: [projects/ui/README.md](projects/ui/README.md).
 
 ## Build and check the package
 
@@ -25,7 +25,7 @@ Publish the unscoped package `springest` from your personal npm account. Verify 
 npm login --registry=https://registry.npmjs.org/
 npm whoami
 npm publish ./dist/ui --access public
-npm view springest@0.2.1 version
+npm view springest@0.3.0 version
 ```
 
 Publish only `dist/ui`, not this private workspace. Never commit credentials or a token to this repository. Update `projects/ui/package.json` to a new version before every later release; a published name/version cannot be overwritten. Licensed MIT.

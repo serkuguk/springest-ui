@@ -150,11 +150,11 @@ describe('new library components', () => {
         fixture.componentInstance.visible.set(true);
         fixture.detectChanges();
         const dialog = fixture.debugElement.children[0].componentInstance as Dialog;
-        expect(dialog.focusTrap).toBe(true);
-        expect(dialog.closable).toBe(true);
-        expect(dialog.closeOnEscape).toBe(true);
-        expect(dialog.dismissableMask).toBe(false);
-        expect(dialog.closeAriaLabel).toBeUndefined();
+        expect(dialog.focusTrap()).toBe(true);
+        expect(dialog.closable()).toBe(true);
+        expect(dialog.closeOnEscape()).toBe(true);
+        expect(dialog.dismissableMask()).toBe(false);
+        expect(dialog.closeAriaLabel()).toBeUndefined();
         const panel = fixture.debugElement.query(element => element.nativeElement.getAttribute?.('role') === 'dialog');
         // shortcut: jsdom has no layout or CSS motion; simulate visibility/events here and use a browser for layout checks.
         const closeButton = panel.nativeElement.querySelector('button') as HTMLButtonElement;
@@ -184,7 +184,7 @@ describe('new library components', () => {
         expect(fixture.nativeElement.querySelector('.p-dialog-close-button').getAttribute('aria-label')).toBe('Закрыть');
         fixture.componentRef.setInput('closeAriaLabel', undefined);
         fixture.detectChanges();
-        expect(fixture.debugElement.children[0].componentInstance.closeAriaLabel).toBeUndefined();
+        expect(fixture.debugElement.children[0].componentInstance.closeAriaLabel()).toBeUndefined();
         expect(fixture.nativeElement.querySelector('.p-dialog-close-button').hasAttribute('aria-label')).toBe(false);
         fixture.componentRef.setInput('closable', false);
         fixture.detectChanges();

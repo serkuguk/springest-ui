@@ -37,6 +37,7 @@ export class CheckboxComponent implements FormValueControl<boolean> {
     public readonly = input<boolean>(false);
     public value = model<boolean>(false);
     public touched = model<boolean>(false);
+    public readonly touch = output<void>();
     public changed = output<boolean>();
 
     onValueChange(checked: boolean): void {
@@ -46,5 +47,6 @@ export class CheckboxComponent implements FormValueControl<boolean> {
 
     onBlur(): void {
         this.touched.set(true);
+        this.touch.emit();
     }
 }

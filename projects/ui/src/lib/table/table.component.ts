@@ -11,7 +11,7 @@ import {
     ViewChild
 } from '@angular/core';
 import {Table, TableModule} from "primeng/table";
-import {TranslateModule} from "@ngx-translate/core";
+import {TranslatePipe} from "@ngx-translate/core";
 import {DatePipe, NgTemplateOutlet} from "@angular/common";
 import {ButtonComponent} from '../button/button.component';
 import {SortEvent} from "primeng/api";
@@ -61,7 +61,7 @@ export interface TableRow {
     standalone: true,
     imports: [
         TableModule,
-        TranslateModule,
+        TranslatePipe,
         NgTemplateOutlet,
         DatePipe,
         ButtonComponent,
@@ -132,7 +132,7 @@ export class TableComponent {
         effect(() => {
             const ds = this.enrichedDataSource();
             if (ds?.length && this.table) {
-                this.table.first = 0;
+                this.table.first.set(0);
             }
         });
     }

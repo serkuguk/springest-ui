@@ -15,7 +15,7 @@ let nextId = 0;
             [disabled]="disabled() || readonly()" [attr.aria-readonly]="readonly()"
             [attr.aria-label]="ariaLabel()" [attr.aria-labelledby]="labelledBy()"
             [attr.aria-describedby]="describedBy()" [attr.aria-invalid]="effectiveInvalid()"
-            (change)="onFileChange($event)" (blur)="touched.set(true)" />
+            (change)="onFileChange($event)" (blur)="touched.set(true); touch.emit()" />
         @if (value().length) {
             <ul>@for (file of value(); track $index) { <li>{{ file.name }}</li> }</ul>
             <app-button label="Clear files" [disabled]="disabled() || readonly()" (click)="clear()" />
@@ -39,6 +39,7 @@ export class FilePickerComponent implements FormValueControl<File[]> {
     readonly readonly = input(false);
     readonly value = model<File[]>([]);
     readonly touched = model(false);
+    readonly touch = output<void>();
     readonly changed = output<File[]>();
     protected readonly id = computed(() => this.field?.controlId() ?? this.inputId());
     protected readonly labelledBy = computed(() => this.field?.labelledBy(this.ariaLabelledBy()) ?? this.ariaLabelledBy());
@@ -65,6 +66,7 @@ export class FilePickerComponent implements FormValueControl<File[]> {
         if (picker) picker.nativeElement.value = '';
         this.setFiles([]);
         this.touched.set(true);
+        this.touch.emit();
     }
 
     focus(options?: FocusOptions): void {

@@ -34,7 +34,7 @@ describe('library toast', () => {
       summary: 'Title', detail: 'Description', sticky: true,
     });
     expect(fixture.nativeElement.textContent).toContain('Description');
-    expect(toast.position).toBe('top-right');
+    expect(toast.position()).toBe('top-right');
   });
 
   it('replaces the current message and restarts the five-second timer', () => {

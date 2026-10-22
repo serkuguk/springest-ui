@@ -14,7 +14,7 @@ let nextId = 0;
             [attr.maxlength]="maxLength()" [disabled]="disabled()" [readOnly]="readonly()"
             [attr.aria-label]="ariaLabel()" [attr.aria-labelledby]="labelledBy()"
             [attr.aria-describedby]="describedBy()" [attr.aria-invalid]="effectiveInvalid()"
-            (input)="onValueChange($any($event.target).value)" (blur)="touched.set(true)"></textarea>`,
+            (input)="onValueChange($any($event.target).value)" (blur)="touched.set(true); touch.emit()"></textarea>`,
     styles: [`:host { display: block; } textarea { width: 100%; box-sizing: border-box; }`],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -31,6 +31,7 @@ export class TextareaComponent implements FormValueControl<string> {
     readonly readonly = input(false);
     readonly value = model<string>('');
     readonly touched = model(false);
+    readonly touch = output<void>();
     readonly changed = output<string>();
     readonly rows = input(3);
     readonly placeholder = input('');

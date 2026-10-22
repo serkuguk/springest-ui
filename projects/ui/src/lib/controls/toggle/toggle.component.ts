@@ -13,7 +13,7 @@ let nextId = 0;
     template: `<p-toggleswitch [inputId]="id()" [ngModel]="value()" [disabled]="disabled() || readonly()" [readonly]="readonly()"
             [ariaLabel]="ariaLabel()" [ariaLabelledBy]="labelledBy()"
             [pt]="{ input: { 'aria-describedby': describedBy(), 'aria-invalid': effectiveInvalid(), 'aria-readonly': readonly() } }"
-            (ngModelChange)="onValueChange($event)" (focusout)="touched.set(true)" />
+            (ngModelChange)="onValueChange($event)" (focusout)="touched.set(true); touch.emit()" />
         @if (label()) { <label [for]="id()">{{ label() }}</label> }`,
     styles: [`:host { display: inline-flex; align-items: center; gap: .5rem; }`],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +31,7 @@ export class ToggleComponent implements FormValueControl<boolean> {
     readonly readonly = input(false);
     readonly value = model<boolean>(false);
     readonly touched = model(false);
+    readonly touch = output<void>();
     readonly changed = output<boolean>();
 
     protected readonly id = computed(() => this.field?.controlId() ?? this.inputId());
@@ -45,7 +46,7 @@ export class ToggleComponent implements FormValueControl<boolean> {
     }
 
     focus(options?: FocusOptions): void {
-        this.control()?.input.nativeElement.focus(options);
+        this.control()?.inputEl().nativeElement.focus(options);
     }
 }
 

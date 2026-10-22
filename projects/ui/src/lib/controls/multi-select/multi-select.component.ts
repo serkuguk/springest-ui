@@ -41,7 +41,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
         'aria-describedby': this.formField?.describedBy(this.ariaDescribedBy()) ?? this.ariaDescribedBy(),
         'aria-invalid': this.formField ? this.formField.hasError() : this.ariaInvalid()
     }));
-    // shortcut: PrimeNG 21 omits its runtime hiddenInput PT key from types; remove the extension when declared upstream.
+    // shortcut: PrimeNG 22 omits its runtime hiddenInput PT key from types; remove the extension when declared upstream.
     protected readonly passThrough = computed<MultiSelectPassThrough & {hiddenInput: PassThroughOption<HTMLInputElement>}>(() => ({hiddenInput: this.inputAria()}));
 
 
@@ -66,6 +66,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
   public changed = output<Value[]>();
   public value = model<Value[]>([]);
   public touched = model<boolean>(false);
+  public readonly touch = output<void>();
   protected readonly multiSelectControl = new FormControl<Value[]>([], {nonNullable: true});
   protected readonly selectedItems = computed(() => {
     const suffix = this.selectedItemsLabel()?.trim();
@@ -92,6 +93,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
 
   onBlur(): void {
     this.touched.set(true);
+    this.touch.emit();
   }
 
   onChanged(event: { value: Value[] }): void {
