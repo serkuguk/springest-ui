@@ -6,23 +6,24 @@
          [resizableColumns]="resizableColumns()"
          [selection]="selectedRowValue()"
          [selectionMode]="selectionMode()"
+         [metaKeySelection]="metaKeySelection() ?? false"
          [customSort]="customSortFun"
          [rowsPerPageOptions]="[10, 25, 100]"
          (onRowSelect)="onSelectedRow($event)"
          (onRowUnselect)="onRowUnselect()"
-         (onSort)="onCustomSort($event)"
+         (sortFunction)="onCustomSort($event)"
          [rows]="rows">
   <ng-template #header let-columns pTemplate="header">
     <tr >
       @for (col of columns; track $index) {
         <th pResizableColumn
             [pSortableColumn]="col.field"
-            [hidden]="!col.visible"
+            [hidden]="col.visible === false"
             [style]="{'min-width': col.minWidth || '100px', 'width': col.width, 'text-align': col.textAlign}"
             scope="col"
         >
           {{ col.header | translate }}
-          @if (showIconSort() && col.field !== showFilterCondition) {
+          @if (showIconSort() && col.field !== showFilterCondition()) {
             <p-sorticon [field]="col.field"></p-sorticon>
           }
         </th>
@@ -31,7 +32,7 @@
       @if (showRowActions()) {
         <th
              scope="col"
-             [attr.id]="'actions-col'"
+             [attr.id]="actionsId"
              [style]="{ width: '7%' }"
         >
             <span class="sr-only">
@@ -47,20 +48,20 @@
     >
       @for (col of columns; track $index) {
         <td  [style]="{'min-width': col.minWidth || '100px', 'width': col.width, 'text-align': col.textAlign}"
-             [hidden]="!col.visible"
+             [hidden]="col.visible === false"
         >
           @if (customCellTemplate && col.type === 'especial') {
             <ng-container
                  *ngTemplateOutlet="customCellTemplate; context: { $implicit: rowData, col: col }"></ng-container>
           } @else {
-              @if (rowData._editing && col.modificable) {
+              @if (editingRow() === rowData && col.field === getEditableField()) {
 
-                <form (keydown.enter)="confirmEdit(rowData)">
+                <form (submit)="$event.preventDefault(); confirmEdit(rowData)" (keydown.escape)="cancelEdit(rowData)">
                   <app-form-field
                        [required]="true"
                        [field]="initialForm.inputValue">
                     <app-basic-input
-                         [placeholder]="''"
+                         [label]="col.header | translate"
                          [formField]="initialForm.inputValue"
                     ></app-basic-input>
                   </app-form-field>
@@ -80,24 +81,24 @@
 
       @if (showRowActions()) {
         <td class="action-cell"
-            [attr.headers]="'actions-col'"
+            [attr.headers]="actionsId"
         >
           <div class="button-cell">
-            @if (!rowData._editing) {
-              <app-button (click)="startEdit(rowData, rowIndex)"
+            @if (editingRow() !== rowData) {
+              <app-button (click)="$event.stopPropagation(); startEdit(rowData, rowIndex)" [aria]="{'aria-label': 'Edit row'}"
                           [iconPos]="'left'"
                           [icon]="'pi pi-pencil'"
-                          [disabled]="rowData._editing"
+                          [disabled]="editingRow() === rowData"
               ></app-button>
             }
 
-            @if (rowData._editing) {
-              <app-button (click)="confirmEdit(rowData)"
+            @if (editingRow() === rowData) {
+              <app-button (click)="$event.stopPropagation(); confirmEdit(rowData)" [aria]="{'aria-label': 'Save row'}"
                           [iconPos]="'left'"
                           [icon]="'pi pi-check'"
               ></app-button>
               <app-button
-                   (click)="cancelEdit(rowData)"
+                   (click)="$event.stopPropagation(); cancelEdit(rowData)" [aria]="{'aria-label': 'Cancel editing'}"
                    [iconPos]="'left'"
                    [icon]="'pi pi-times'"
               ></app-button>
@@ -120,7 +121,7 @@
         <span>{{ rowData[col.field] }}</span>
       }
       @case ('date-reverse') {
-        <span>{{ rowData[col.field] | date:'YYYY-MM-DD' }}</span>
+        <span>{{ rowData[col.field] | date:'yyyy-MM-dd' }}</span>
       }
       @case ('decimal') {
         <span>{{ rowData[col.field] }}</span>
@@ -128,16 +129,14 @@
       @case ('icon') {
         @if (rowData[col.field] === showIconCondition()) {
           <div>
-            <div class="tooltip-wrapper">
-              <em [class]="iconClass()"
-                  [style]="{ color: iconColor() }"></em>
-              <span class="tooltip-text">{{ rowData.ToolTipMsg || msgTooltip | translate }}</span>
-            </div>
+            <em [class]="iconClass()" [style]="{ color: iconColor() }" tabindex="0"
+                [pTooltip]="(rowData.ToolTipMsg || msgTooltip()) | translate" tooltipEvent="both"
+                [attr.aria-label]="(rowData.ToolTipMsg || msgTooltip()) | translate"></em>
           </div>
         }
       }
       @case ('clickable') {
-        <span class="clickable" (click)="startEdit(rowData, col.rowIndex)">{{ rowData[col.field] }}</span>
+        <button type="button" class="clickable" (click)="$event.stopPropagation(); startEdit(rowData)">{{ rowData[col.field] }}</button>
       }
     }
   </ng-template>

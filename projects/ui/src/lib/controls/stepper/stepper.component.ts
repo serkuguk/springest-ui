@@ -71,6 +71,7 @@ export interface StepChangeEvent {
  */
 @Component({
     selector: 'app-stepper-control',
+    host: {'(focusout)': 'onBlur($event)'},
     standalone: true,
     imports: [
         CommonModule,
@@ -268,6 +269,8 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
      * Handle finish action on the last step
      */
     onFinish(): void {
+        if (this.isDisabled() || !this.isLastStep()) return;
+        this.propagateTouched();
         this.complete.emit();
     }
 
@@ -317,7 +320,8 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
         this.isDisabled.set(isDisabled);
     }
 
-    onBlur(): void {
+    onBlur(event?: FocusEvent): void {
+        if (event && (event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) return;
         this.propagateTouched();
     }
 }

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, model, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model, output, viewChild} from '@angular/core';
 import {InputTextModule} from 'primeng/inputtext';
 import {FloatLabel} from "primeng/floatlabel";
 import {FormValueControl} from "@angular/forms/signals";
@@ -15,6 +15,7 @@ let nextInputId = 0;
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicInputComponent<T extends string | number | null = string> implements FormValueControl<T> {
+    private readonly control = viewChild<ElementRef<HTMLInputElement>>('control');
     readonly formField = inject(FormFieldComponent, {optional: true});
     readonly placeholder = input<string>("Input some text...");
     readonly labelType = input<string>("in_label");
@@ -46,6 +47,10 @@ export class BasicInputComponent<T extends string | number | null = string> impl
         const value = (this.type() === 'number' ? (Number.isFinite(field.valueAsNumber) ? field.valueAsNumber : null) : field.value) as T;
         this.value.set(value);
         this.changed.emit(value);
+    }
+
+    focus(options?: FocusOptions): void {
+        this.control()?.nativeElement.focus(options);
     }
 
     onKeyup(event: Event): void { this.onInput(event); }

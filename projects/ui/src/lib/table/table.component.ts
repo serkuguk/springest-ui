@@ -1,6 +1,6 @@
 import {
+    afterRenderEffect,
     ChangeDetectionStrategy,
-    ChangeDetectorRef,
     Component,
     computed,
     ContentChild, effect,
@@ -8,16 +8,20 @@ import {
     output,
     signal,
     TemplateRef,
-    ViewChild
+    ViewChild,
+    viewChild
 } from '@angular/core';
 import {Table, TableModule} from "primeng/table";
 import {TranslatePipe} from "@ngx-translate/core";
 import {DatePipe, NgTemplateOutlet} from "@angular/common";
 import {ButtonComponent} from '../button/button.component';
+import {Tooltip} from 'primeng/tooltip';
 import {SortEvent} from "primeng/api";
 import {FormFieldComponent} from '../controls/form-field/form-field.component';
 import {BasicInputComponent} from '../controls/basic-input/basic-input.component';
 import {FormField, form, required} from "@angular/forms/signals";
+
+let nextTableId = 0;
 
 type ColumnType =
     | 'datetime' | 'date' | 'date-mes' | 'date-reverse'
@@ -32,11 +36,6 @@ export interface TableColumn {
     type: ColumnType;
     visible?: boolean;
     modificable?: boolean;
-}
-
-interface IOutputRow {
-    row: any[],
-    rowIndex: number
 }
 
 export interface TableRowUpdateEvent {
@@ -61,6 +60,7 @@ export interface TableRow {
     standalone: true,
     imports: [
         TableModule,
+        Tooltip,
         TranslatePipe,
         NgTemplateOutlet,
         DatePipe,
@@ -75,29 +75,13 @@ export interface TableRow {
 })
 export class TableComponent {
 
+    private readonly editor = viewChild(BasicInputComponent);
     rows = 10;
-    private currentlyEditingRow: TableRow | null = null;
-    private readonly originalByRow = new WeakMap<TableRow, Partial<TableRow>>();
-
-    // Local signal to track the index of the currently editing row
-    private editingRowIndex = signal<number | null>(null);
-
+    readonly editingRow = signal<TableRow | null>(null);
+    readonly actionsId = 'springest-table-actions-' + ++nextTableId;
     dataSource = input<TableRow[]>([]);
-
-    // Computed signal that enriches data with _editing flag without mutating input
-    enrichedDataSource = computed(() => {
-        const data = this.dataSource();
-        const editIndex = this.editingRowIndex();
-
-        if (editIndex === null) {
-            return data;
-        }
-
-        return data.map((row, index) => ({
-            ...row,
-            _editing: index === editIndex
-        }));
-    });
+    // ponytail: copy only the array so PrimeNG sorting never mutates consumer data.
+    enrichedDataSource = computed(() => [...this.dataSource()]);
     dataSourceColumns = input<TableColumn[]>([]);
     iconColor = input<string>('');
     iconClass = input<string>('');
@@ -113,7 +97,7 @@ export class TableComponent {
     showIconCondition = input<boolean>(false);
     showFilterCondition = input<string>();
     editableFieldName = input<string>(); // Optional: explicitly specify which field is editable
-    customSortFun = false;
+    customSortFun = true;
     editModel = signal({inputValue: ''});
     initialForm = form(this.editModel, (p) => {
         required(p.inputValue);
@@ -128,12 +112,13 @@ export class TableComponent {
     @ViewChild('table') table!: Table;
     @ContentChild('customCellTemplate') customCellTemplate: TemplateRef<any> | undefined;
 
-    constructor(private readonly cd: ChangeDetectorRef) {
+    constructor() {
+        afterRenderEffect(() => {
+            if (this.editingRow()) this.editor()?.focus();
+        });
         effect(() => {
-            const ds = this.enrichedDataSource();
-            if (ds?.length && this.table) {
-                this.table.first.set(0);
-            }
+            const row = this.editingRow();
+            if (row && !this.dataSource().includes(row)) this.editingRow.set(null);
         });
     }
 
@@ -153,45 +138,32 @@ export class TableComponent {
         const col = this.dataSourceColumns().find(c => c.field === field);
         if (!col) return;
 
-        if (!data) return;
+        if (!data || data === this.dataSource()) return;
 
-        data.sort((a: TableRow, b: TableRow) => {
-            const av = a[field];
-            const bv = b[field];
-
+        const value = (row: TableRow): string | number | null => {
+            const raw = row[field];
+            if (raw === null || raw === undefined || raw === '') return null;
             if (this.isDateType(col.type)) {
-                const ad = new Date(av);
-                const bd = new Date(bv);
-                return (ad.getTime() - bd.getTime()) * (order ?? 1);
+                const time = new Date(raw).getTime();
+                return Number.isFinite(time) ? time : null;
             }
-            if (typeof av === 'number' && typeof bv === 'number') {
-                return (av - bv) * (order ?? 1);
-            }
-            return String(av).localeCompare(String(bv)) * (order ?? 1);
+            return typeof raw === 'number' ? (Number.isFinite(raw) ? raw : null) : String(raw);
+        };
+        // Empty/invalid values sort last in either direction.
+        data.sort((a, b) => {
+            const av = value(a), bv = value(b);
+            if (av === null) return bv === null ? 0 : 1;
+            if (bv === null) return -1;
+            return (typeof av === 'number' && typeof bv === 'number'
+                ? av - bv : String(av).localeCompare(String(bv))) * (order ?? 1);
         });
-    }
-
-    private takeSnapshot(row: TableRow): void {
-        const snap: Partial<TableRow> = {};
-        (this.dataSourceColumns() || [])
-            .filter(c => c && c.modificable)
-            .forEach(c => snap[c.field] = row[c.field]);
-        this.originalByRow.set(row, snap);
-    }
-
-    private revertFromSnapshot(row: TableRow): void {
-        const snap = this.originalByRow.get(row);
-        if (snap) {
-            Object.keys(snap).forEach(k => row[k] = snap[k]);
-            this.originalByRow.delete(row);
-        }
     }
 
     /**
      * Determines the field name to edit.
      * Priority: 1) explicit editableFieldName input, 2) first modificable column
      */
-    private getEditableField(): string | null {
+    getEditableField(): string | null {
         // First, check if editableFieldName is explicitly provided
         const explicitField = this.editableFieldName();
         if (explicitField) {
@@ -220,59 +192,23 @@ export class TableComponent {
             || col.type === 'clickable';
     }
 
-    public startEdit(row: TableRow, rowIndex: number): void {
-        // Dynamically get the editable field instead of hardcoding 'Valor'
-        const editableField = this.getEditableField();
-        if (!editableField) {
-            console.warn('No editable field found. Make sure at least one column has modificable: true or provide editableFieldName input.');
-            return;
-        }
-
-        this.editModel.set({inputValue: String(row[editableField] ?? '')});
-
-        // If another row was being edited, revert its changes
-        if (this.currentlyEditingRow && this.currentlyEditingRow !== row) {
-            this.revertFromSnapshot(this.currentlyEditingRow);
-        }
-
-        // Update the editing index signal (no mutation of input data)
-        this.editingRowIndex.set(rowIndex);
-        this.takeSnapshot(row);
-        this.currentlyEditingRow = row;
-
-        this.cd.markForCheck();
+    public startEdit(row: TableRow, _rowIndex?: number): void {
+        const field = this.getEditableField();
+        if (!field || !this.dataSource().includes(row)) return;
+        this.initialForm().reset({inputValue: String(row[field] ?? '')});
+        this.editingRow.set(row);
     }
 
     public confirmEdit(row: TableRow): void {
-        const editableField = this.getEditableField();
-        if (!editableField) {
-            console.warn('No editable field found.');
-            return;
-        }
-
-        // Clear the editing state
-        this.editingRowIndex.set(null);
-        this.originalByRow.delete(row);
-        this.currentlyEditingRow = null;
-
-        this.rowUpdate.emit({
-            data: row,
-            field: editableField,
-            newValue: this.editModel().inputValue,
-        });
+        const field = this.getEditableField();
+        if (!field || this.editingRow() !== row || !this.dataSource().includes(row)) return;
+        this.initialForm.inputValue().markAsTouched();
+        if (this.initialForm().invalid()) return;
+        this.editingRow.set(null);
+        this.rowUpdate.emit({data: row, field, newValue: this.editModel().inputValue});
     }
 
-    public cancelEdit(row: TableRow): void {
-        const snap = this.originalByRow.get(row);
-        if (snap) {
-            Object.keys(snap).forEach(k => row[k] = snap[k]);
-            this.originalByRow.delete(row);
-        }
-
-        // Clear the editing state
-        this.editingRowIndex.set(null);
-        this.currentlyEditingRow = null;
-        this.cd.markForCheck();
+    public cancelEdit(_row?: TableRow): void {
+        this.editingRow.set(null);
     }
-
 }

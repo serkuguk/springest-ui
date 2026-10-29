@@ -54,6 +54,30 @@ describe('StepperControlComponent', () => {
         fixture.detectChanges();
     });
 
+    it('marks touched on leaving the control but not while moving within it', () => {
+        const touched = jest.fn();
+        component.registerOnTouched(touched);
+        const inside = fixture.nativeElement.querySelector('button');
+        inside.dispatchEvent(new FocusEvent('focusout', {bubbles: true, relatedTarget: inside}));
+        expect(touched).not.toHaveBeenCalled();
+        inside.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
+        expect(touched).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not finish before the last step or while disabled', () => {
+        const complete = jest.fn();
+        component.complete.subscribe(complete);
+        component.onFinish();
+        expect(complete).not.toHaveBeenCalled();
+        component.goToStep(2);
+        component.setDisabledState(true);
+        component.onFinish();
+        expect(complete).not.toHaveBeenCalled();
+        component.setDisabledState(false);
+        component.onFinish();
+        expect(complete).toHaveBeenCalledTimes(1);
+    });
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
@@ -97,6 +121,7 @@ describe('StepperControlComponent', () => {
 
     it('should emit complete event on finish', () => {
         const completeSpy = jest.spyOn(component.complete, 'emit');
+        component.goToStep(2);
         component.onFinish();
         expect(completeSpy).toHaveBeenCalled();
     });

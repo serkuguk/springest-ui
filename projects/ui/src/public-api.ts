@@ -20,3 +20,17 @@ export * from './lib/controls/stepper';
 export * from './lib/types';
 export * from './lib/toast/toast.component';
 export * from './lib/toast/toast.service';
+export * from './lib/controls/input-number/input-number.component';
+export {ProgressSpinner} from 'primeng/progressspinner';
+export {Tooltip} from 'primeng/tooltip';
+export {Popover} from 'primeng/popover';
+export {ConfirmPopup} from 'primeng/confirmpopup';
+export {Accordion, AccordionPanel, AccordionHeader, AccordionContent} from 'primeng/accordion';
+export {ConfirmationService} from 'primeng/api';
+export type {Confirmation} from 'primeng/api';
+export type {AccordionValue} from 'primeng/types/accordion';
+
+export type {TooltipPosition, TooltipEvent, TooltipPassThrough} from 'primeng/types/tooltip';
+export type {PopoverPassThrough} from 'primeng/types/popover';
+export type {ConfirmPopupDefaultFocus, ConfirmPopupPassThrough} from 'primeng/types/confirmpopup';
+export type {ProgressSpinnerPassThrough} from 'primeng/types/progressspinner';

@@ -130,7 +130,7 @@ Pagination defaults to `first = 0`, `rows = 10`, and `totalRecords = 0`. `first`
 
 ## Development checks
 
-Run `npm run build` and `npm run check:ui`. The latter checks strict Angular consumer templates and the affected component/integration tests, including Toast. `npm run check:toast` remains available. The existing runner reuses Jest from the sibling `../angular-core` checkout; it must be present. Select individual specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
+Run `npm run build` and `npm run check:ui`. The latter checks strict Angular consumer templates and all component/integration tests, including Table, Stepper, Avatar, Charts, InputNumber and Toast. `npm run check:toast` remains available. The existing runner reuses Jest from the sibling `../angular-core` checkout; it must be present. Select individual specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
 
 ## Toast
 
@@ -157,6 +157,130 @@ export class AppComponent {
 `mostrarToast(message, description = null, variant = 'correct')` supports `correct`, `warn`, `error`, and `info`. A new notification replaces the current one and restarts its five-second lifetime. The host appears at the top right using your configured PrimeNG theme. Close it with its accessible close button or call `clear()`. `toast$` emits the current `ToastPayload` or `null`.
 
 `ToastService` is provided in root. The host provides its own PrimeNG `MessageService`; no application provider is needed. `ToastPayload` and `ToastVariant` are also exported from `springest`.
+
+## Available components
+
+All imports below come from `springest`. Existing selectors remain unchanged.
+
+| Area | Exports |
+| --- | --- |
+| Text and numbers | BasicInputComponent, InputNumberComponent, PasswordInputComponent, TextareaComponent |
+| Choices | BasicSelectComponent (dropdown), MultiSelectComponent, CheckboxComponent, ToggleComponent, SegmentedControlComponent |
+| Forms | FormFieldComponent, FilePickerComponent, CalendarComponent, StepperControlComponent, StepperStepDirective |
+| Data and display | TableComponent, PaginationComponent, ChartsComponent, AvatarComponent |
+| Actions and feedback | ButtonComponent, DialogComponent, ToastComponent, ToastService |
+| Official PrimeNG API | ProgressSpinner, Tooltip, Popover, ConfirmPopup, ConfirmationService, Accordion, AccordionPanel, AccordionHeader, AccordionContent |
+
+### InputNumber
+
+Import `InputNumberComponent` and add it to the consuming component's imports. Initialize `amount` as `signal<number | null>(null)`.
+
+```html
+<app-input-number label="Amount" [(value)]="amount" [min]="-100" [max]="100"
+  [step]="0.5" locale="en-US" [minFractionDigits]="0" [maxFractionDigits]="2" />
+<app-input-number label="Price" [(value)]="amount" mode="currency" currency="EUR" locale="de-DE" />
+```
+
+The value is a number or null; clearing produces null. Formatting is delegated to PrimeNG.
+Currency mode requires a currency code. Defaults: decimal mode, step 1 and PrimeNG's locale/fraction settings.
+Use `[formField]="fields.amount"` with a numeric Signal Forms field as in the Fields and validation example.
+Put min/max validators in the schema when using formField; do not also bind those inputs.
+The component supports FormField labels/errors, changed/touch events, touched, disabled, readonly,
+ariaLabel, ariaLabelledBy, ariaDescribedBy, ariaInvalid and focus().
+BasicInput with type="number" remains available for native numeric input.
+
+### Spinner, Tooltip, Popover and Accordion
+
+These are direct PrimeNG exports: use their official selectors and inputs.
+
+```ts
+import {
+  ProgressSpinner, Tooltip, Popover,
+  Accordion, AccordionPanel, AccordionHeader, AccordionContent,
+} from 'springest';
+// Add these exports to the consuming component's imports.
+// Component property used by the example:
+activePanel: string | number | (string | number)[] | null | undefined = null;
+```
+
+```html
+<p-progress-spinner ariaLabel="Loading data" />
+<button type="button" pTooltip="More information" tooltipEvent="both">Help</button>
+
+<button type="button" (click)="details.toggle($event)">Details</button>
+<p-popover #details>
+  <p>Additional information</p>
+  <button type="button" (click)="details.hide()">Close</button>
+</p-popover>
+
+<p-accordion [(value)]="activePanel">
+  <p-accordion-panel value="details">
+    <p-accordion-header>Details</p-accordion-header>
+    <p-accordion-content>Panel content</p-accordion-content>
+  </p-accordion-panel>
+</p-accordion>
+```
+
+Popover exposes show(event), toggle(event) and hide(). Accordion supports multiple expanded
+panels with `[multiple]="true"` and an array value. Give each panel a stable, distinct value.
+Tooltip supports hover, focus or both; use both for mouse and keyboard access.
+Public types include AccordionValue, TooltipPosition, TooltipEvent and the
+Tooltip/Popover/ConfirmPopup/ProgressSpinner PassThrough types.
+
+### ConfirmPopup
+
+Provide ConfirmationService in the component that hosts p-confirmpopup and triggers it,
+or once at the application root. It is not automatically provided by springest.
+
+```ts
+import {Component, inject} from '@angular/core';
+import {ConfirmPopup, ConfirmationService} from 'springest';
+
+@Component({
+  imports: [ConfirmPopup],
+  providers: [ConfirmationService],
+  template: `
+    <button type="button" (click)="confirm($event)">Apply changes</button>
+    <p-confirmpopup />
+  `,
+})
+export class ConfirmExample {
+  private readonly confirmation = inject(ConfirmationService);
+  confirm(event: MouseEvent): void {
+    this.confirmation.confirm({
+      target: event.currentTarget as HTMLElement,
+      message: 'Apply these changes?',
+      acceptLabel: 'Apply',
+      rejectLabel: 'Cancel',
+      accept: () => this.apply(),
+    });
+  }
+  apply(): void { /* application action */ }
+}
+```
+
+The Confirmation type is also exported. Dialog is the existing modal app-dialog;
+Popover is for arbitrary anchored content; ConfirmPopup is for anchored confirmation.
+Toast continues to use ToastComponent and ToastService as documented above.
+
+### Table behavior
+
+Import TableComponent and configure `provideTranslateService()` from `@ngx-translate/core`
+at the application root; table headers and tooltip messages use its translation pipe.
+
+Columns are visible unless visible is false. Editing uses editableFieldName, or the first
+column marked modificable. Only that cell is edited; empty values cannot be saved.
+Activate the edit button/cell to focus the editor. Enter saves and Escape cancels.
+rowUpdate contains the original row object, field and new string value; the application applies
+the update. Sorting and editing never change input rows. Editing preserves the current page
+and is cancelled if its row object is removed or replaced.
+Empty values and invalid dates sort last in either direction. Date-reverse displays yyyy-MM-dd.
+
+### Full verification
+
+`npm run check:ui` runs every spec, including Table, Stepper, Avatar, Charts and InputNumber,
+plus strict Angular consumer-template compilation. It still reuses Jest from the sibling
+angular-core checkout; that checkout must be installed. No new test dependency is required.
 
 ## License
 
