@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, model, output, viewChild} from '@angular/core';
 import {FormValueControl} from '@angular/forms/signals';
 import {FormsModule} from '@angular/forms';
-import {ToggleSwitch, ToggleSwitchModule} from 'primeng/toggleswitch';
+import {ToggleSwitch, ToggleSwitchModule} from '@openng/optimus-ui/toggleswitch';
 import {FormFieldComponent} from '../form-field/form-field.component';
 
 let nextId = 0;
@@ -46,7 +46,7 @@ export class ToggleComponent implements FormValueControl<boolean> {
     }
 
     focus(options?: FocusOptions): void {
-        this.control()?.inputEl().nativeElement.focus(options);
+        this.control()?.input.nativeElement.focus(options);
     }
 }
 

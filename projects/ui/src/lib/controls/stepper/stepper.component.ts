@@ -12,8 +12,8 @@ import {
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {StepperModule} from 'primeng/stepper';
-import {ButtonModule} from 'primeng/button';
+import {StepperModule} from '@openng/optimus-ui/stepper';
+import {ButtonModule} from '@openng/optimus-ui/button';
 import {StepperStepDirective} from './stepper-step.directive';
 
 /**

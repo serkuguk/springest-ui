@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model, output, viewChild} from '@angular/core';
 import {FormValueControl} from '@angular/forms/signals';
-import {TextareaModule} from 'primeng/textarea';
+import {TextareaModule} from '@openng/optimus-ui/textarea';
 import {FormFieldComponent} from '../form-field/form-field.component';
 
 let nextId = 0;

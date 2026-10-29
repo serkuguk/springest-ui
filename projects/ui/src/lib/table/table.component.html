@@ -24,7 +24,7 @@
         >
           {{ col.header | translate }}
           @if (showIconSort() && col.field !== showFilterCondition()) {
-            <p-sorticon [field]="col.field"></p-sorticon>
+            <p-sortIcon [field]="col.field"></p-sortIcon>
           }
         </th>
       }

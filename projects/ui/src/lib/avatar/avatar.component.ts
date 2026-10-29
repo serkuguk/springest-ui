@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, input} from '@angular/core';
-import {Avatar} from "primeng/avatar";
-import {OverlayBadge} from "primeng/overlaybadge";
+import {Avatar} from "@openng/optimus-ui/avatar";
+import {OverlayBadge} from "@openng/optimus-ui/overlaybadge";
 
 @Component({
     selector: 'app-avatar',

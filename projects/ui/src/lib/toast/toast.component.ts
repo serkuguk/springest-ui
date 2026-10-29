@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, inject, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MessageService } from 'primeng/api';
-import { Toast, ToastCloseEvent } from 'primeng/toast';
+import { MessageService } from '@openng/optimus-ui/api';
+import { Toast, ToastCloseEvent } from '@openng/optimus-ui/toast';
 import { ToastPayload, ToastService } from './toast.service';
 
 @Component({
@@ -21,7 +21,7 @@ export class ToastComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.service.toast$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(payload => {
       this.current = payload;
-      // ponytail: reset PrimeNG 21's public list synchronously; animated clear() can close a replacement.
+      // ponytail: reset OptimusUI 2.0.2's public list synchronously; animated clear() can close a replacement.
       this.toast().messages = [];
       if (payload) {
         this.messages.add({

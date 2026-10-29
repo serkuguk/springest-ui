@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
-import {Dialog} from 'primeng/dialog';
+import {Dialog} from '@openng/optimus-ui/dialog';
 import {DialogComponent} from '../../dialog/dialog.component';
 import {PaginationComponent} from '../../pagination/pagination.component';
 import {FilePickerComponent} from '../file-picker/file-picker.component';
@@ -89,7 +89,10 @@ describe('new library components', () => {
         expect(fixture.componentInstance.value()).toBe(true);
         checkbox.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
         expect(fixture.componentInstance.touched()).toBe(true);
-        fixture.componentInstance.focus();
+        const focus = jest.spyOn(checkbox, 'focus');
+        const options = {preventScroll: true};
+        fixture.componentInstance.focus(options);
+        expect(focus).toHaveBeenCalledWith(options);
         expect(document.activeElement).toBe(checkbox);
         fixture.componentRef.setInput('readonly', true);
         fixture.detectChanges();
@@ -150,11 +153,11 @@ describe('new library components', () => {
         fixture.componentInstance.visible.set(true);
         fixture.detectChanges();
         const dialog = fixture.debugElement.children[0].componentInstance as Dialog;
-        expect(dialog.focusTrap()).toBe(true);
-        expect(dialog.closable()).toBe(true);
-        expect(dialog.closeOnEscape()).toBe(true);
-        expect(dialog.dismissableMask()).toBe(false);
-        expect(dialog.closeAriaLabel()).toBeUndefined();
+        expect(dialog.focusTrap).toBe(true);
+        expect(dialog.closable).toBe(true);
+        expect(dialog.closeOnEscape).toBe(true);
+        expect(dialog.dismissableMask).toBe(false);
+        expect(dialog.closeAriaLabel).toBeUndefined();
         const panel = fixture.debugElement.query(element => element.nativeElement.getAttribute?.('role') === 'dialog');
         // shortcut: jsdom has no layout or CSS motion; simulate visibility/events here and use a browser for layout checks.
         const closeButton = panel.nativeElement.querySelector('button') as HTMLButtonElement;
@@ -184,7 +187,7 @@ describe('new library components', () => {
         expect(fixture.nativeElement.querySelector('.p-dialog-close-button').getAttribute('aria-label')).toBe('Закрыть');
         fixture.componentRef.setInput('closeAriaLabel', undefined);
         fixture.detectChanges();
-        expect(fixture.debugElement.children[0].componentInstance.closeAriaLabel()).toBeUndefined();
+        expect(fixture.debugElement.children[0].componentInstance.closeAriaLabel).toBeUndefined();
         expect(fixture.nativeElement.querySelector('.p-dialog-close-button').hasAttribute('aria-label')).toBe(false);
         fixture.componentRef.setInput('closable', false);
         fixture.detectChanges();
@@ -262,7 +265,7 @@ describe('new library components', () => {
         expect(dialog.documentEscapeListener).toBeNull();
     });
 
-    it('updates paginator models and emits the unmodified PrimeNG state', () => {
+    it('updates paginator models and emits the unmodified OptimusUI state', () => {
         const fixture = TestBed.createComponent(PaginationComponent);
         fixture.componentRef.setInput('totalRecords', 25);
         fixture.detectChanges();

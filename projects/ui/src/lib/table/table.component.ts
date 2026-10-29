@@ -11,12 +11,12 @@ import {
     ViewChild,
     viewChild
 } from '@angular/core';
-import {Table, TableModule} from "primeng/table";
+import {Table, TableModule} from "@openng/optimus-ui/table";
 import {TranslatePipe} from "@ngx-translate/core";
 import {DatePipe, NgTemplateOutlet} from "@angular/common";
 import {ButtonComponent} from '../button/button.component';
-import {Tooltip} from 'primeng/tooltip';
-import {SortEvent} from "primeng/api";
+import {Tooltip} from '@openng/optimus-ui/tooltip';
+import {SortEvent} from "@openng/optimus-ui/api";
 import {FormFieldComponent} from '../controls/form-field/form-field.component';
 import {BasicInputComponent} from '../controls/basic-input/basic-input.component';
 import {FormField, form, required} from "@angular/forms/signals";

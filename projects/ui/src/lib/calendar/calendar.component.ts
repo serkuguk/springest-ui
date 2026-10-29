@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, model, output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {FormValueControl} from '@angular/forms/signals';
-import {DatePickerModule} from 'primeng/datepicker';
-import {FloatLabelModule} from 'primeng/floatlabel';
+import {DatePickerModule} from '@openng/optimus-ui/datepicker';
+import {FloatLabelModule} from '@openng/optimus-ui/floatlabel';
 
 import {FormFieldComponent} from '../controls/form-field/form-field.component';
 

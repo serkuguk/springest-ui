@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, model, output} from '@angular/core';
-import {FloatLabel} from "primeng/floatlabel";
+import {FloatLabel} from "@openng/optimus-ui/floatlabel";
 import {FormsModule} from "@angular/forms";
-import {Password} from "primeng/password";
+import {Password} from "@openng/optimus-ui/password";
 import {FormValueControl} from "@angular/forms/signals";
 
 import {FormFieldComponent} from '../form-field/form-field.component';

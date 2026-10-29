@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, input} from '@angular/core';
-import {UIChart} from "primeng/chart";
+import {UIChart} from "@openng/optimus-ui/chart";
 import {ChartData} from '../types';
 import {ChartOptionsInput} from './interface/chart-options.interface';
 

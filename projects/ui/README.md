@@ -1,16 +1,59 @@
 # springest
 
-Standalone UI components for Angular 22.2, PrimeNG 22 and Signal Forms.
+Standalone UI components for Angular 22.2, OptimusUI 2 and Signal Forms.
 
 ## Install
 
 ```sh
-npm install springest@0.3.0 primeng@^22.1.2 @ngx-translate/core@^18.0.0 chart.js@^4.5.0
+pnpm add springest@0.4.0 @openng/optimus-ui@2.0.2 @openng/optimus-ui-themes@2.0.2 @openng/icons@1.0.0 @ngx-translate/core@^18.0.0 chart.js@^4.5.0
 ```
 
-Angular common/core/forms (^22.2.2) and RxJS (^7.8.0) are peer dependencies and must be provided by the application. This release supports Angular 22 only and uses stable Angular Signal Forms. Configure a PrimeNG theme in your application.
+Angular common/core/forms/platform-browser/router (^22.2.2), CDK (^22.2.3) and RxJS (^7.8.0) must be provided by the application. This release supports Angular 22 only and uses stable Angular Signal Forms. Configure an OptimusUI theme in your application.
 
-PrimeNG 22 also requires Angular CDK, Router and platform-browser 22. Install these in the application if they are not already present. For library development use TypeScript 6.0.x and Node.js `^22.22.3`, `^24.15.0` or `>=26.0.0`.
+OptimusUI 2 also requires Angular CDK, Router and platform-browser 22. Install these in the application if they are not already present. For library development use TypeScript 6.0.x and Node.js `^22.22.3`, `^24.15.0` or `>=26.0.0`.
+
+```sh
+pnpm add @angular/cdk@^22.2.3 @angular/router@^22.2.2 @angular/platform-browser@^22.2.2
+```
+
+Configure providers in `app.config.ts` (Table also uses ngx-translate):
+
+```ts
+import {ApplicationConfig} from '@angular/core';
+import {provideTranslateService} from '@ngx-translate/core';
+import {provideOptimus} from '@openng/optimus-ui/config';
+import Aura from '@openng/optimus-ui-themes/aura';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideOptimus({theme: {preset: Aura}}),
+    provideTranslateService(),
+  ],
+};
+```
+
+Add the icon font to the application's global `styles.css`:
+
+```css
+@import '@openng/icons/openng-icons.css';
+```
+
+Theme and icons are application dependencies; springest does not configure them.
+
+## Upgrade from springest 0.3.0
+
+Remove `primeng` and replace springest with `springest@0.4.0` and the packages above using pnpm. Remove old theme/icon packages once the application no longer imports them. Keep Angular 22.2, Chart.js and ngx-translate on their existing compatible versions. Do not bypass peer-dependency checks.
+
+| Previous application configuration | Replacement |
+| --- | --- |
+| `providePrimeNG` from `primeng/config` | `provideOptimus` from `@openng/optimus-ui/config` |
+| `@primeuix/themes/...` | `@openng/optimus-ui-themes/...` |
+| `primeicons/primeicons.css` | `@openng/icons/openng-icons.css` |
+| Direct imports `primeng/...` | `@openng/optimus-ui/...` |
+
+springest selectors, inputs/outputs, Signal Forms integration and public type names are retained. Keep `p-*` selectors, `pTemplate`, `.p-*`, `pi-*` classes and `--p-*` variables. Direct exports use OptimusUI's actual runtime API: retaining type names does not make every signature identical to PrimeNG 22. For example, Accordion array models must use homogeneous `string[] | number[]`, as in the example below. The compatibility alias `AccordionValue` still permits mixed arrays for existing type imports; narrow the model passed to OptimusUI's Accordion.
+
+See the [OptimusUI migration guide](https://v1.optimus.openng.org/migration/primeng) for the rename map and the [v2 update guide](https://optimus.openng.org/migration/update) for version requirements. Use v2 for Angular 22; do not run v1 installation commands. MIT notices are retained in the distributed LICENSE; preserve dependency copyright notices when redistributing their code.
 
 ```ts
 import { ButtonComponent, BasicSelectComponent } from 'springest';
@@ -122,15 +165,15 @@ SegmentedControl selects one scalar value and defaults to `variant="segments"`. 
   [rowsPerPageOptions]="[10, 25, 100]" (pageChange)="loadPage($event)" />
 ```
 
-Import `ButtonComponent`, `DialogComponent`, and `PaginationComponent`. Button projects nested content into its actual button and forwards its `aria` dictionary there. Loading shows the PrimeNG spinner, sets `aria-busy`, and disables activation; use an accessible name for icon-only buttons.
+Import `ButtonComponent`, `DialogComponent`, and `PaginationComponent`. Button projects nested content into its actual button and forwards its `aria` dictionary there. Loading shows the OptimusUI spinner, sets `aria-busy`, and disables activation; use an accessible name for icon-only buttons.
 
-Dialog is modal and traps focus, restoring the opener's focus after closing. `closable` and `closeOnEscape` default to true; `dismissableMask` defaults to false. Set `dismissableMask` to true to allow background dismissal. Set `closable` to false during saving to hide the close button and block Escape/background dismissal, including while the dialog is already open. `closeAriaLabel` supplies the close button's accessible name; leaving it unset preserves PrimeNG's existing default. Dragging and resizing are disabled. The application supplies all action buttons through `[dialogActions]` and controls `visible`; disable or guard its own Cancel action during saving too.
+Dialog is modal and traps focus, restoring the opener's focus after closing. `closable` and `closeOnEscape` default to true; `dismissableMask` defaults to false. Set `dismissableMask` to true to allow background dismissal. Set `closable` to false during saving to hide the close button and block Escape/background dismissal, including while the dialog is already open. `closeAriaLabel` supplies the close button's accessible name; leaving it unset preserves OptimusUI's existing default. Dragging and resizing are disabled. The application supplies all action buttons through `[dialogActions]` and controls `visible`; disable or guard its own Cancel action during saving too.
 
 Pagination defaults to `first = 0`, `rows = 10`, and `totalRecords = 0`. `first` is the record offset, and `page` in the exported `PaginatorState` event is zero-based. The component changes page state; the application loads or slices records.
 
 ## Development checks
 
-Run `npm run build` and `npm run check:ui`. The latter checks strict Angular consumer templates and all component/integration tests, including Table, Stepper, Avatar, Charts, InputNumber and Toast. `npm run check:toast` remains available. The existing runner reuses Jest from the sibling `../angular-core` checkout; it must be present. Select individual specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
+Run `pnpm build` and `pnpm check:ui`. The latter checks strict Angular consumer templates and all component/integration tests, including Table, Stepper, Avatar, Charts, InputNumber and Toast. `pnpm check:toast` remains available. The existing runner reuses Jest from the sibling `../angular-core` checkout; it must be present. Select individual specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
 
 ## Toast
 
@@ -154,9 +197,9 @@ export class AppComponent {
 }
 ```
 
-`mostrarToast(message, description = null, variant = 'correct')` supports `correct`, `warn`, `error`, and `info`. A new notification replaces the current one and restarts its five-second lifetime. The host appears at the top right using your configured PrimeNG theme. Close it with its accessible close button or call `clear()`. `toast$` emits the current `ToastPayload` or `null`.
+`mostrarToast(message, description = null, variant = 'correct')` supports `correct`, `warn`, `error`, and `info`. A new notification replaces the current one and restarts its five-second lifetime. The host appears at the top right using your configured OptimusUI theme. Close it with its accessible close button or call `clear()`. `toast$` emits the current `ToastPayload` or `null`.
 
-`ToastService` is provided in root. The host provides its own PrimeNG `MessageService`; no application provider is needed. `ToastPayload` and `ToastVariant` are also exported from `springest`.
+`ToastService` is provided in root. The host provides its own OptimusUI `MessageService`; no application provider is needed. `ToastPayload` and `ToastVariant` are also exported from `springest`.
 
 ## Available components
 
@@ -169,7 +212,7 @@ All imports below come from `springest`. Existing selectors remain unchanged.
 | Forms | FormFieldComponent, FilePickerComponent, CalendarComponent, StepperControlComponent, StepperStepDirective |
 | Data and display | TableComponent, PaginationComponent, ChartsComponent, AvatarComponent |
 | Actions and feedback | ButtonComponent, DialogComponent, ToastComponent, ToastService |
-| Official PrimeNG API | ProgressSpinner, Tooltip, Popover, ConfirmPopup, ConfirmationService, Accordion, AccordionPanel, AccordionHeader, AccordionContent |
+| Official OptimusUI API | ProgressSpinner, Tooltip, Popover, ConfirmPopup, ConfirmationService, Accordion, AccordionPanel, AccordionHeader, AccordionContent |
 
 ### InputNumber
 
@@ -181,8 +224,8 @@ Import `InputNumberComponent` and add it to the consuming component's imports. I
 <app-input-number label="Price" [(value)]="amount" mode="currency" currency="EUR" locale="de-DE" />
 ```
 
-The value is a number or null; clearing produces null. Formatting is delegated to PrimeNG.
-Currency mode requires a currency code. Defaults: decimal mode, step 1 and PrimeNG's locale/fraction settings.
+The value is a number or null; clearing produces null. Formatting is delegated to OptimusUI.
+Currency mode requires a currency code. Defaults: decimal mode, step 1 and OptimusUI's locale/fraction settings.
 Use `[formField]="fields.amount"` with a numeric Signal Forms field as in the Fields and validation example.
 Put min/max validators in the schema when using formField; do not also bind those inputs.
 The component supports FormField labels/errors, changed/touch events, touched, disabled, readonly,
@@ -191,7 +234,7 @@ BasicInput with type="number" remains available for native numeric input.
 
 ### Spinner, Tooltip, Popover and Accordion
 
-These are direct PrimeNG exports: use their official selectors and inputs.
+These are direct OptimusUI exports: use their official selectors and inputs.
 
 ```ts
 import {
@@ -200,7 +243,7 @@ import {
 } from 'springest';
 // Add these exports to the consuming component's imports.
 // Component property used by the example:
-activePanel: string | number | (string | number)[] | null | undefined = null;
+activePanel: string | number | string[] | number[] | null | undefined = null;
 ```
 
 ```html
@@ -278,7 +321,7 @@ Empty values and invalid dates sort last in either direction. Date-reverse displ
 
 ### Full verification
 
-`npm run check:ui` runs every spec, including Table, Stepper, Avatar, Charts and InputNumber,
+`pnpm check:ui` runs every spec, including Table, Stepper, Avatar, Charts and InputNumber,
 plus strict Angular consumer-template compilation. It still reuses Jest from the sibling
 angular-core checkout; that checkout must be installed. No new test dependency is required.
 

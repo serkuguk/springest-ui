@@ -2,7 +2,7 @@ import {NgTemplateOutlet} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, contentChild, ElementRef, inject, input, model, output, TemplateRef, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {FormValueControl} from '@angular/forms/signals';
-import {SelectButtonModule} from 'primeng/selectbutton';
+import {SelectButtonModule} from '@openng/optimus-ui/selectbutton';
 import {ControlItemInterface, Value} from '../../types';
 import {FormFieldComponent} from '../form-field/form-field.component';
 

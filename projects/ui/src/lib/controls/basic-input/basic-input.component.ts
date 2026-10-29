@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model, output, viewChild} from '@angular/core';
-import {InputTextModule} from 'primeng/inputtext';
-import {FloatLabel} from "primeng/floatlabel";
+import {InputTextModule} from '@openng/optimus-ui/inputtext';
+import {FloatLabel} from "@openng/optimus-ui/floatlabel";
 import {FormValueControl} from "@angular/forms/signals";
 import {FormFieldComponent} from '../form-field/form-field.component';
 

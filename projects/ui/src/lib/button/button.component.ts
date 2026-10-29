@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
-import {ButtonModule} from "primeng/button";
+import {ButtonModule} from "@openng/optimus-ui/button";
 
 export type ButtonType = 'button' | 'submit';
 export type ButtonSizeType = "small" | "large";

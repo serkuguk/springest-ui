@@ -41,7 +41,7 @@ class Host {
     readonly(p.amount, () => this.readOnly());
   });
   readonly standalone = signal<number | null>(12.5);
-  active: string | number | (string | number)[] | undefined = 'one';
+  active: string | number | string[] | number[] | undefined = 'one';
   changes: (number | null)[] = [];
 }
 
@@ -79,6 +79,15 @@ describe('InputNumber and official exports', () => {
       expect(host.data().amount).toBe(expected);
       expect(host.changes.at(-1)).toBe(expected);
     }
+  });
+
+  it('focuses the native number input and forwards focus options', async () => {
+    const {controls, input} = await setup();
+    const focus = jest.spyOn(input, 'focus');
+    const options = {preventScroll: true};
+    (controls[0].componentInstance as InputNumberComponent).focus(options);
+    expect(focus).toHaveBeenCalledWith(options);
+    expect(document.activeElement).toBe(input);
   });
 
   it('supports two-way reset, currency formatting, disabled and readonly', async () => {

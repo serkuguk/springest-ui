@@ -53,19 +53,19 @@ describe('TableComponent', () => {
     fixture.componentRef.setInput('paginator', true);
     fixture.detectChanges();
     component.onCustomSort({data: component.enrichedDataSource(), field: 'name', order: 1});
-    component.table.first.set(10);
+    (fixture.nativeElement.querySelectorAll('.p-paginator-page')[1] as HTMLButtonElement).click();
     fixture.detectChanges();
     const row = component.enrichedDataSource()[10];
     (fixture.nativeElement.querySelector('tbody button.clickable') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(component.editingRow()).toBe(row);
-    expect(component.table.first()).toBe(10);
+    expect(component.table.first).toBe(10);
     expect(fixture.nativeElement.querySelectorAll('tbody app-basic-input').length).toBe(1);
     expect(document.activeElement).toBe(fixture.nativeElement.querySelector('tbody input'));
     component.cancelEdit();
     fixture.detectChanges();
     expect(component.editingRow()).toBeNull();
-    expect(component.table.first()).toBe(10);
+    expect(component.table.first).toBe(10);
   });
 
   it('rejects empty edits, emits the original row and never mutates it', () => {

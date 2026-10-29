@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, model, output, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {FormValueControl} from '@angular/forms/signals';
-import {InputNumber} from 'primeng/inputnumber';
+import {InputNumber} from '@openng/optimus-ui/inputnumber';
 import {FormFieldComponent} from '../form-field/form-field.component';
 
 let nextId = 0;
@@ -55,6 +55,6 @@ export class InputNumberComponent implements FormValueControl<number | null> {
     }
 
     focus(options?: FocusOptions): void {
-        this.control()?.input().nativeElement.focus(options);
+        this.control()?.input.nativeElement.focus(options);
     }
 }

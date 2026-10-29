@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, model, output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {FormValueControl} from '@angular/forms/signals';
-import {FloatLabel} from 'primeng/floatlabel';
-import {Select, SelectChangeEvent} from 'primeng/select';
+import {FloatLabel} from '@openng/optimus-ui/floatlabel';
+import {Select, SelectChangeEvent} from '@openng/optimus-ui/select';
 
 import {FormFieldComponent} from '../form-field/form-field.component';
 

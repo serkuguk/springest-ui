@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, model, output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {FormValueControl} from '@angular/forms/signals';
-import {CheckboxModule} from 'primeng/checkbox';
+import {CheckboxModule} from '@openng/optimus-ui/checkbox';
 
 import {FormFieldComponent} from '../form-field/form-field.component';
 

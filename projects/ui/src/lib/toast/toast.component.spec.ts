@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { MessageService } from 'primeng/api';
-import { Toast } from 'primeng/toast';
+import { MessageService } from '@openng/optimus-ui/api';
+import { Toast } from '@openng/optimus-ui/toast';
 import { ToastComponent } from './toast.component';
 import { ToastPayload, ToastService, ToastVariant } from './toast.service';
 
@@ -46,7 +46,7 @@ describe('library toast', () => {
       summary: 'Title', detail: 'Description', sticky: true,
     });
     expect(fixture.nativeElement.textContent).toContain('Description');
-    expect(toast.position()).toBe('top-right');
+    expect(toast.position).toBe('top-right');
   });
 
   it('replaces the current message and restarts the five-second timer', () => {
