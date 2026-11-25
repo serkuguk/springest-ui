@@ -1,16 +1,19 @@
 {
   "name": "springest",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "description": "Reusable Springest Angular UI components",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/forms": "^21.2.0",
-    "@ngx-translate/core": "^15.0.0",
+    "@angular/cdk": "^22.2.3",
+    "@angular/common": "^22.2.2",
+    "@angular/core": "^22.2.2",
+    "@angular/forms": "^22.2.2",
+    "@angular/platform-browser": "^22.2.2",
+    "@angular/router": "^22.2.2",
+    "@ngx-translate/core": "^18.0.0",
     "chart.js": "^4.5.0",
-    "primeng": "^21.1.0",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "@openng/optimus-ui": "^2.0.2"
   },
   "dependencies": {
     "tslib": "^2.6.2"

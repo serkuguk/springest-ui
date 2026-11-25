@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, model, output} from '@angular/core';
-import {InputTextModule} from 'primeng/inputtext';
-import {FloatLabel} from "primeng/floatlabel";
+import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model, output, viewChild} from '@angular/core';
+import {InputTextModule} from '@openng/optimus-ui/inputtext';
+import {FloatLabel} from "@openng/optimus-ui/floatlabel";
 import {FormValueControl} from "@angular/forms/signals";
 import {FormFieldComponent} from '../form-field/form-field.component';
 
@@ -15,13 +15,14 @@ let nextInputId = 0;
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicInputComponent<T extends string | number | null = string> implements FormValueControl<T> {
+    private readonly control = viewChild<ElementRef<HTMLInputElement>>('control');
     readonly formField = inject(FormFieldComponent, {optional: true});
     readonly placeholder = input<string>("Input some text...");
     readonly labelType = input<string>("in_label");
     readonly isDisabled = input<boolean>(false);
     readonly type = input<'text' | 'email' | 'search' | 'number'>('text');
-    readonly min = input<number>();
-    readonly max = input<number>();
+    readonly min = input<NonNullable<T>>();
+    readonly max = input<NonNullable<T>>();
     readonly step = input<number | 'any'>();
     readonly readonly = input(false);
     readonly disabled = input(false);
@@ -38,6 +39,7 @@ export class BasicInputComponent<T extends string | number | null = string> impl
     readonly effectiveId = computed(() => this.formField?.controlId() ?? this.inputId());
     readonly value = model<T>('' as T);
     readonly touched = model<boolean>(false);
+    readonly touch = output<void>();
     readonly changed = output<T>();
 
     onInput(event: Event): void {
@@ -47,9 +49,14 @@ export class BasicInputComponent<T extends string | number | null = string> impl
         this.changed.emit(value);
     }
 
+    focus(options?: FocusOptions): void {
+        this.control()?.nativeElement.focus(options);
+    }
+
     onKeyup(event: Event): void { this.onInput(event); }
 
     onBlur(): void {
         this.touched.set(true);
+        this.touch.emit();
     }
 }

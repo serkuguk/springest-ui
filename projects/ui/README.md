@@ -1,14 +1,59 @@
 # springest
 
-Standalone UI components for Angular 21.2, PrimeNG 21 and Signal Forms.
+Standalone UI components for Angular 22.2, OptimusUI 2 and Signal Forms.
 
 ## Install
 
 ```sh
-npm install springest@0.2.1 primeng@^21.1.0 @ngx-translate/core@^15.0.0 chart.js@^4.5.0
+pnpm add springest@0.4.0 @openng/optimus-ui@2.0.2 @openng/optimus-ui-themes@2.0.2 @openng/icons@1.0.0 @ngx-translate/core@^18.0.0 chart.js@^4.5.0
 ```
 
-Angular common/core/forms (^21.2.0) and RxJS (^7.8.0) are peer dependencies and must be provided by the application. Angular Signal Forms are experimental in Angular 21; this package targets that version. Configure a PrimeNG theme in your application.
+Angular common/core/forms/platform-browser/router (^22.2.2), CDK (^22.2.3) and RxJS (^7.8.0) must be provided by the application. This release supports Angular 22 only and uses stable Angular Signal Forms. Configure an OptimusUI theme in your application.
+
+OptimusUI 2 also requires Angular CDK, Router and platform-browser 22. Install these in the application if they are not already present. For library development use TypeScript 6.0.x and Node.js `^22.22.3`, `^24.15.0` or `>=26.0.0`.
+
+```sh
+pnpm add @angular/cdk@^22.2.3 @angular/router@^22.2.2 @angular/platform-browser@^22.2.2
+```
+
+Configure providers in `app.config.ts` (Table also uses ngx-translate):
+
+```ts
+import {ApplicationConfig} from '@angular/core';
+import {provideTranslateService} from '@ngx-translate/core';
+import {provideOptimus} from '@openng/optimus-ui/config';
+import Aura from '@openng/optimus-ui-themes/aura';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideOptimus({theme: {preset: Aura}}),
+    provideTranslateService(),
+  ],
+};
+```
+
+Add the icon font to the application's global `styles.css`:
+
+```css
+@import '@openng/icons/openng-icons.css';
+```
+
+Theme and icons are application dependencies; springest does not configure them.
+
+## Upgrade from springest 0.3.0
+
+Remove `primeng` and replace springest with `springest@0.4.0` and the packages above using pnpm. Remove old theme/icon packages once the application no longer imports them. Keep Angular 22.2, Chart.js and ngx-translate on their existing compatible versions. Do not bypass peer-dependency checks.
+
+| Previous application configuration | Replacement |
+| --- | --- |
+| `providePrimeNG` from `primeng/config` | `provideOptimus` from `@openng/optimus-ui/config` |
+| `@primeuix/themes/...` | `@openng/optimus-ui-themes/...` |
+| `primeicons/primeicons.css` | `@openng/icons/openng-icons.css` |
+| Direct imports `primeng/...` | `@openng/optimus-ui/...` |
+
+springest selectors, inputs/outputs, Signal Forms integration and public type names are retained. Keep `p-*` selectors, `pTemplate`, `.p-*`, `pi-*` classes and `--p-*` variables. Direct exports use OptimusUI's actual runtime API: retaining type names does not make every signature identical to PrimeNG 22. For example, Accordion array models must use homogeneous `string[] | number[]`, as in the example below. The compatibility alias `AccordionValue` still permits mixed arrays for existing type imports; narrow the model passed to OptimusUI's Accordion.
+
+See the [OptimusUI migration guide](https://v1.optimus.openng.org/migration/primeng) for the rename map and the [v2 update guide](https://optimus.openng.org/migration/update) for version requirements. Use v2 for Angular 22; do not run v1 installation commands. MIT notices are retained in the distributed LICENSE; preserve dependency copyright notices when redistributing their code.
 
 ```ts
 import { ButtonComponent, BasicSelectComponent } from 'springest';
@@ -98,6 +143,8 @@ Import `FilePickerComponent`, `ToggleComponent`, and `SegmentedControlComponent`
 
 FilePicker selects local files and displays their names. Default selection is a single file; clearing or resetting to `[]` also clears the native picker, allowing the same file to be selected again. Cancelling the picker preserves the current selection. `accept` is a browser hint; validate files before upload in your application.
 
+Set `FILE_PICKER.CLEAR_FILES` in the application's ngx-translate catalog to translate the clear button. The default label is “Clear files”, including in apps without a translation provider.
+
 SegmentedControl selects one scalar value and defaults to `variant="segments"`. `allowEmpty` defaults to false, so clicking the selected item keeps it selected. Cards use the same keyboard behavior and can project `#item` with `$implicit: ControlItemInterface` and `selected: boolean` (`SegmentedControlItemContext`). Readonly disables interaction in Toggle and SegmentedControl.
 
 ## Buttons, dialog and pagination
@@ -120,15 +167,15 @@ SegmentedControl selects one scalar value and defaults to `variant="segments"`. 
   [rowsPerPageOptions]="[10, 25, 100]" (pageChange)="loadPage($event)" />
 ```
 
-Import `ButtonComponent`, `DialogComponent`, and `PaginationComponent`. Button projects nested content into its actual button and forwards its `aria` dictionary there. Loading shows the PrimeNG spinner, sets `aria-busy`, and disables activation; use an accessible name for icon-only buttons.
+Import `ButtonComponent`, `DialogComponent`, and `PaginationComponent`. Button projects nested content into its actual button and forwards its `aria` dictionary there. Loading shows the OptimusUI spinner, sets `aria-busy`, and disables activation; use an accessible name for icon-only buttons.
 
-Dialog is modal and traps focus, restoring the opener's focus after closing. `closable` and `closeOnEscape` default to true; `dismissableMask` defaults to false. Set `dismissableMask` to true to allow background dismissal. Set `closable` to false during saving to hide the close button and block Escape/background dismissal, including while the dialog is already open. `closeAriaLabel` supplies the close button's accessible name; leaving it unset preserves PrimeNG's existing default. Dragging and resizing are disabled. The application supplies all action buttons through `[dialogActions]` and controls `visible`; disable or guard its own Cancel action during saving too.
+Dialog is modal and traps focus, restoring the opener's focus after closing. `closable` and `closeOnEscape` default to true; `dismissableMask` defaults to false. Set `dismissableMask` to true to allow background dismissal. Set `closable` to false during saving to hide the close button and block Escape/background dismissal, including while the dialog is already open. `closeAriaLabel` supplies the close button's accessible name; leaving it unset preserves OptimusUI's existing default. Dragging and resizing are disabled. The application supplies all action buttons through `[dialogActions]` and controls `visible`; disable or guard its own Cancel action during saving too.
 
 Pagination defaults to `first = 0`, `rows = 10`, and `totalRecords = 0`. `first` is the record offset, and `page` in the exported `PaginatorState` event is zero-based. The component changes page state; the application loads or slices records.
 
 ## Development checks
 
-Run `npm run build` and `npm run check:ui`. The latter checks strict Angular consumer templates and the affected component/integration tests, including Toast. `npm run check:toast` remains available. The existing runner reuses Jest from the sibling `../angular-core` checkout; it must be present. Select individual specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
+From the repository root, run `pnpm install --frozen-lockfile`, `pnpm build` and `pnpm check:ui`. The last command compiles the strict Angular consumer templates and runs every UI spec with the repository's Jest installation. Run `pnpm check:toast` for Toast or select specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
 
 ## Toast
 
@@ -152,9 +199,130 @@ export class AppComponent {
 }
 ```
 
-`mostrarToast(message, description = null, variant = 'correct')` supports `correct`, `warn`, `error`, and `info`. A new notification replaces the current one and restarts its five-second lifetime. The host appears at the top right using your configured PrimeNG theme. Close it with its accessible close button or call `clear()`. `toast$` emits the current `ToastPayload` or `null`.
+`mostrarToast(message, description = null, variant = 'correct')` supports `correct`, `warn`, `error`, and `info`. A new notification replaces the current one and restarts its five-second lifetime. The host appears at the top right using your configured OptimusUI theme. Close it with its accessible close button or call `clear()`. `toast$` emits the current `ToastPayload` or `null`.
 
-`ToastService` is provided in root. The host provides its own PrimeNG `MessageService`; no application provider is needed. `ToastPayload` and `ToastVariant` are also exported from `springest`.
+`ToastService` is provided in root. The host provides its own OptimusUI `MessageService`; no application provider is needed. `ToastPayload` and `ToastVariant` are also exported from `springest`.
+
+## Available components
+
+All imports below come from `springest`. Existing selectors remain unchanged.
+
+| Area | Exports |
+| --- | --- |
+| Text and numbers | BasicInputComponent, InputNumberComponent, PasswordInputComponent, TextareaComponent |
+| Choices | BasicSelectComponent (dropdown), MultiSelectComponent, CheckboxComponent, ToggleComponent, SegmentedControlComponent |
+| Forms | FormFieldComponent, FilePickerComponent, CalendarComponent, StepperControlComponent, StepperStepDirective |
+| Data and display | TableComponent, PaginationComponent, ChartsComponent, AvatarComponent |
+| Actions and feedback | ButtonComponent, DialogComponent, ToastComponent, ToastService |
+| Official OptimusUI API | ProgressSpinner, Tooltip, Popover, ConfirmPopup, ConfirmationService, Accordion, AccordionPanel, AccordionHeader, AccordionContent |
+
+### InputNumber
+
+Import `InputNumberComponent` and add it to the consuming component's imports. Initialize `amount` as `signal<number | null>(null)`.
+
+```html
+<app-input-number label="Amount" [(value)]="amount" [min]="-100" [max]="100"
+  [step]="0.5" locale="en-US" [minFractionDigits]="0" [maxFractionDigits]="2" />
+<app-input-number label="Price" [(value)]="amount" mode="currency" currency="EUR" locale="de-DE" />
+```
+
+The value is a number or null; clearing produces null. Formatting is delegated to OptimusUI.
+Currency mode requires a currency code. Defaults: decimal mode, step 1 and OptimusUI's locale/fraction settings.
+Use `[formField]="fields.amount"` with a numeric Signal Forms field as in the Fields and validation example.
+Put min/max validators in the schema when using formField; do not also bind those inputs.
+The component supports FormField labels/errors, changed/touch events, touched, disabled, readonly,
+ariaLabel, ariaLabelledBy, ariaDescribedBy, ariaInvalid and focus().
+BasicInput with type="number" remains available for native numeric input.
+
+### Spinner, Tooltip, Popover and Accordion
+
+These are direct OptimusUI exports: use their official selectors and inputs.
+
+```ts
+import {
+  ProgressSpinner, Tooltip, Popover,
+  Accordion, AccordionPanel, AccordionHeader, AccordionContent,
+} from 'springest';
+// Add these exports to the consuming component's imports.
+// Component property used by the example:
+activePanel: string | number | string[] | number[] | null | undefined = null;
+```
+
+```html
+<p-progress-spinner ariaLabel="Loading data" />
+<button type="button" pTooltip="More information" tooltipEvent="both">Help</button>
+
+<button type="button" (click)="details.toggle($event)">Details</button>
+<p-popover #details>
+  <p>Additional information</p>
+  <button type="button" (click)="details.hide()">Close</button>
+</p-popover>
+
+<p-accordion [(value)]="activePanel">
+  <p-accordion-panel value="details">
+    <p-accordion-header>Details</p-accordion-header>
+    <p-accordion-content>Panel content</p-accordion-content>
+  </p-accordion-panel>
+</p-accordion>
+```
+
+Popover exposes show(event), toggle(event) and hide(). Accordion supports multiple expanded
+panels with `[multiple]="true"` and an array value. Give each panel a stable, distinct value.
+Tooltip supports hover, focus or both; use both for mouse and keyboard access.
+Public types include AccordionValue, TooltipPosition, TooltipEvent and the
+Tooltip/Popover/ConfirmPopup/ProgressSpinner PassThrough types.
+
+### ConfirmPopup
+
+Provide ConfirmationService in the component that hosts p-confirmpopup and triggers it,
+or once at the application root. It is not automatically provided by springest.
+
+```ts
+import {Component, inject} from '@angular/core';
+import {ConfirmPopup, ConfirmationService} from 'springest';
+
+@Component({
+  imports: [ConfirmPopup],
+  providers: [ConfirmationService],
+  template: `
+    <button type="button" (click)="confirm($event)">Apply changes</button>
+    <p-confirmpopup />
+  `,
+})
+export class ConfirmExample {
+  private readonly confirmation = inject(ConfirmationService);
+  confirm(event: MouseEvent): void {
+    this.confirmation.confirm({
+      target: event.currentTarget as HTMLElement,
+      message: 'Apply these changes?',
+      acceptLabel: 'Apply',
+      rejectLabel: 'Cancel',
+      accept: () => this.apply(),
+    });
+  }
+  apply(): void { /* application action */ }
+}
+```
+
+The Confirmation type is also exported. Dialog is the existing modal app-dialog;
+Popover is for arbitrary anchored content; ConfirmPopup is for anchored confirmation.
+Toast continues to use ToastComponent and ToastService as documented above.
+
+### Table behavior
+
+Import TableComponent and configure `provideTranslateService()` from `@ngx-translate/core`
+at the application root; table headers and tooltip messages use its translation pipe.
+Set `TABLE.EDIT_ROW`, `TABLE.SAVE_ROW` and `TABLE.CANCEL_EDITING` in the application catalog for
+the accessible names of the editing buttons. Missing keys use the English names.
+
+Columns are visible unless visible is false. Editing uses editableFieldName, or the first
+column marked modificable. Only that cell is edited; empty values cannot be saved.
+Activate the edit button/cell to focus the editor. Enter saves and Escape cancels.
+rowUpdate contains the original row object, field and new string value; the application applies
+the update. Sorting and editing never change input rows. Editing preserves the current page
+and is cancelled if its row object is removed or replaced.
+Empty values and invalid dates sort last in either direction. The `datetime`, `date-mes`
+and `date-reverse` columns display a dash for empty or unformattable values.
 
 ## License
 

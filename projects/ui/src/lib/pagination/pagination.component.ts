@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, input, model, output} from '@angular/core';
-import {PaginatorModule, PaginatorState} from 'primeng/paginator';
+import {PaginatorModule, PaginatorState} from '@openng/optimus-ui/paginator';
 
-export type {PaginatorState} from 'primeng/paginator';
+export type {PaginatorState} from '@openng/optimus-ui/paginator';
 
 @Component({
     selector: 'app-pagination',

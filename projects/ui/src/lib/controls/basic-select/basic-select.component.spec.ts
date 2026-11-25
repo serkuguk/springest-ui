@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SelectChangeEvent } from 'primeng/select';
+import { SelectChangeEvent } from '@openng/optimus-ui/select';
 
 import { BasicSelectComponent } from './basic-select.component';
 

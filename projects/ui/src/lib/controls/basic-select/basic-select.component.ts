@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, model, output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {FormValueControl} from '@angular/forms/signals';
-import {FloatLabel} from 'primeng/floatlabel';
-import {Select, SelectChangeEvent} from 'primeng/select';
+import {FloatLabel} from '@openng/optimus-ui/floatlabel';
+import {Select, SelectChangeEvent} from '@openng/optimus-ui/select';
 
 import {FormFieldComponent} from '../form-field/form-field.component';
 
@@ -57,6 +57,7 @@ export class BasicSelectComponent implements FormValueControl<unknown | null> {
     public readonly disabled = input<boolean>(false);
   public readonly value = model<unknown | null>(null);
   public readonly touched = model<boolean>(false);
+  public readonly touch = output<void>();
   public readonly closed = output<void>();
 
   onChanged({value}: SelectChangeEvent): void {
@@ -67,6 +68,7 @@ export class BasicSelectComponent implements FormValueControl<unknown | null> {
 
   onClosed(): void {
     this.touched.set(true);
+    this.touch.emit();
     this.closed.emit();
   }
 }

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {FormControl, Validators} from '@angular/forms';
-import {disabled, email, form, FormField, max, maxLength, min, minLength, readonly, required, submit, validate} from '@angular/forms/signals';
+import {debounce, disabled, email, form, FormField, max, maxLength, min, minLength, readonly, required, submit, validate} from '@angular/forms/signals';
 import {
   BasicInputComponent, BasicSelectComponent, ButtonComponent, CalendarComponent, CheckboxComponent,
   DialogComponent, FilePickerComponent, FormFieldComponent, MultiSelectComponent, PaginationComponent,
@@ -108,7 +108,35 @@ class ReactiveHost {
   readonly control = signal(new FormControl('', Validators.required));
 }
 
+@Component({
+  imports: [FormField, BasicInputComponent],
+  template: `<app-basic-input [formField]="fields.text" />`,
+})
+class BlurHost {
+  readonly values = signal({text: ''});
+  readonly fields = form(this.values, path => debounce(path.text, 'blur'));
+}
+
 describe('Signal Forms library integration', () => {
+  it('commits blur-debounced input and resets its value and touched state', async () => {
+    const fixture = TestBed.createComponent(BlurHost);
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    input.value = 'Deferred value';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.values().text).toBe('');
+    input.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.values().text).toBe('Deferred value');
+    expect(fixture.componentInstance.fields.text().touched()).toBe(true);
+    fixture.componentInstance.fields().reset({text: ''});
+    fixture.detectChanges();
+    expect(input.value).toBe('');
+    expect(fixture.componentInstance.fields.text().touched()).toBe(false);
+  });
+
   it('updates projected ARIA when a Reactive Forms control is touched, corrected or replaced', async () => {
     const fixture = TestBed.createComponent(ReactiveHost);
     fixture.detectChanges();
@@ -136,6 +164,27 @@ describe('Signal Forms library integration', () => {
     const control = (name: string, selector = 'input') => root.querySelector(`[data-control="${name}"] ${selector}`)! as HTMLElement;
     return {fixture, host, root, control};
   }
+
+  it.each([
+    ['text', 'text', 'input', 'blur'],
+    ['textarea', 'note', 'textarea', 'blur'],
+    ['file', 'files', 'input', 'blur'],
+    ['toggle', 'enabled', 'input', 'focusout'],
+    ['segmented', 'choice', '[role="group"]', 'focusout'],
+    ['select', 'selection', '[role="combobox"]', 'blur'],
+    ['multi', 'many', 'input', 'blur'],
+    ['password', 'password', 'input', 'blur'],
+    ['checkbox', 'checked', 'input', 'blur'],
+    ['calendar', 'date', 'input', 'blur'],
+  ])('marks %s touched through its native focus event', async (name, field, selector, event) => {
+    const {fixture, host, control} = await mount();
+    const state = host.fields[field as keyof ReturnType<typeof host.values>];
+    expect(state().touched()).toBe(false);
+    control(name, selector).dispatchEvent(new FocusEvent(event, {bubbles: true, relatedTarget: null}));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(state().touched()).toBe(true);
+  });
 
   it('shows errors after blur, preserves descriptions, and removes errors after correction/reset', async () => {
     const {fixture, host, root, control} = await mount();

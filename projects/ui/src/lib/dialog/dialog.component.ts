@@ -1,6 +1,6 @@
 import {DOCUMENT} from '@angular/common';
 import {afterRenderEffect, ChangeDetectionStrategy, Component, effect, inject, input, model, viewChild} from '@angular/core';
-import {Dialog, DialogModule} from 'primeng/dialog';
+import {Dialog, DialogModule} from '@openng/optimus-ui/dialog';
 
 @Component({
     selector: 'app-dialog',
@@ -38,7 +38,7 @@ export class DialogComponent {
             const closeOnEscape = this.closeOnEscape();
             const dismissableMask = this.dismissableMask();
             if (!this.visible() || !dialog?.container() || !dialog.wrapper) return;
-            // shortcut: PrimeNG 21 snapshots closing options on entry; remove rebinding when upstream handles live changes.
+            // ponytail: OptimusUI 2.0.2 snapshots closing options on entry; remove rebinding when upstream handles live changes.
             dialog.unbindDocumentEscapeListener();
             dialog.unbindMaskClickListener();
             if (closable && closeOnEscape) dialog.bindDocumentEscapeListener();

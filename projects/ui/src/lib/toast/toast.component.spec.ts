@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { MessageService } from 'primeng/api';
-import { Toast } from 'primeng/toast';
+import { MessageService } from '@openng/optimus-ui/api';
+import { Toast } from '@openng/optimus-ui/toast';
 import { ToastComponent } from './toast.component';
 import { ToastPayload, ToastService, ToastVariant } from './toast.service';
 
@@ -22,6 +22,18 @@ describe('library toast', () => {
     const toast = fixture.debugElement.children[0].componentInstance as Toast;
     return { fixture, toast, service: TestBed.inject(ToastService) };
   }
+
+  it('cancels its lifetime timer and completes subscriptions on service destruction', () => {
+    const service = TestBed.inject(ToastService);
+    const complete = jest.fn();
+    service.toast$.subscribe({complete});
+    service.mostrarToast('Pending');
+    const clear = jest.spyOn(service, 'clear');
+    service.ngOnDestroy();
+    jest.advanceTimersByTime(5000);
+    expect(clear).not.toHaveBeenCalled();
+    expect(complete).toHaveBeenCalledTimes(1);
+  });
 
   it.each<ToastVariant>(['correct', 'warn', 'error', 'info'])('renders %s with a local MessageService', variant => {
     const { fixture, toast, service } = createToast();

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, model, output} from '@angular/core';
-import {FloatLabel} from "primeng/floatlabel";
+import {FloatLabel} from "@openng/optimus-ui/floatlabel";
 import {FormsModule} from "@angular/forms";
-import {Password} from "primeng/password";
+import {Password} from "@openng/optimus-ui/password";
 import {FormValueControl} from "@angular/forms/signals";
 
 import {FormFieldComponent} from '../form-field/form-field.component';
@@ -46,6 +46,7 @@ export class PasswordInputComponent implements FormValueControl<string> {
     public readonly disabled = input<boolean>(false);
     public value = model<string>('');
     public touched = model<boolean>(false);
+    public readonly touch = output<void>();
     public changed = output<string>();
 
     onInput(event: Event): void {
@@ -56,5 +57,6 @@ export class PasswordInputComponent implements FormValueControl<string> {
 
     onBlur(): void {
         this.touched.set(true);
+        this.touch.emit();
     }
 }

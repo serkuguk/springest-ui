@@ -2,7 +2,7 @@ import {NgTemplateOutlet} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, contentChild, ElementRef, inject, input, model, output, TemplateRef, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {FormValueControl} from '@angular/forms/signals';
-import {SelectButtonModule} from 'primeng/selectbutton';
+import {SelectButtonModule} from '@openng/optimus-ui/selectbutton';
 import {ControlItemInterface, Value} from '../../types';
 import {FormFieldComponent} from '../form-field/form-field.component';
 
@@ -56,6 +56,7 @@ export class SegmentedControlComponent implements FormValueControl<Value | null>
     readonly readonly = input(false);
     readonly value = model<Value | null>(null);
     readonly touched = model(false);
+    readonly touch = output<void>();
     readonly changed = output<Value | null>();
     protected readonly id = computed(() => this.field?.controlId() ?? this.inputId());
     protected readonly labelledBy = computed(() => this.field?.labelledBy(this.ariaLabelledBy())
@@ -71,7 +72,10 @@ export class SegmentedControlComponent implements FormValueControl<Value | null>
 
     onFocusOut(event: FocusEvent): void {
         const group = event.currentTarget as HTMLElement;
-        if (!group.contains(event.relatedTarget as Node | null)) this.touched.set(true);
+        if (!group.contains(event.relatedTarget as Node | null)) {
+            this.touched.set(true);
+            this.touch.emit();
+        }
     }
 
     focus(options?: FocusOptions): void {

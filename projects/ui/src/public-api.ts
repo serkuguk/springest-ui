@@ -20,3 +20,21 @@ export * from './lib/controls/stepper';
 export * from './lib/types';
 export * from './lib/toast/toast.component';
 export * from './lib/toast/toast.service';
+export * from './lib/controls/input-number/input-number.component';
+export {ProgressSpinner} from '@openng/optimus-ui/progressspinner';
+export {Tooltip} from '@openng/optimus-ui/tooltip';
+export {Popover} from '@openng/optimus-ui/popover';
+export {ConfirmPopup} from '@openng/optimus-ui/confirmpopup';
+export {Accordion, AccordionPanel, AccordionHeader, AccordionContent} from '@openng/optimus-ui/accordion';
+export {ConfirmationService} from '@openng/optimus-ui/api';
+export type {Confirmation} from '@openng/optimus-ui/api';
+export type AccordionValue = string | number | (string | number)[] | null | undefined;
+
+export type {TooltipPassThrough} from '@openng/optimus-ui/types/tooltip';
+export type {PopoverPassThrough} from '@openng/optimus-ui/types/popover';
+export type {ConfirmPopupPassThrough} from '@openng/optimus-ui/types/confirmpopup';
+export type {ProgressSpinnerPassThrough} from '@openng/optimus-ui/types/progressspinner';
+
+export type TooltipPosition = 'right' | 'left' | 'top' | 'bottom';
+export type TooltipEvent = 'hover' | 'focus' | 'both';
+export type ConfirmPopupDefaultFocus = 'accept' | 'reject' | 'none';

@@ -4,6 +4,7 @@ import {
     ContentChildren,
     forwardRef,
     input,
+    linkedSignal,
     output,
     QueryList,
     signal,
@@ -12,8 +13,8 @@ import {
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {StepperModule} from 'primeng/stepper';
-import {ButtonModule} from 'primeng/button';
+import {StepperModule} from '@openng/optimus-ui/stepper';
+import {ButtonModule} from '@openng/optimus-ui/button';
 import {StepperStepDirective} from './stepper-step.directive';
 
 /**
@@ -71,6 +72,7 @@ export interface StepChangeEvent {
  */
 @Component({
     selector: 'app-stepper-control',
+    host: {'(focusout)': 'onBlur($event)'},
     standalone: true,
     imports: [
         CommonModule,
@@ -148,7 +150,11 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
     /**
      * Current active step value (signal-based state)
      */
-    public activeStep = signal<number>(0);
+    private readonly selectedStep = signal<number | null>(null);
+    public activeStep = linkedSignal(
+        () => this.selectedStep() ?? this.steps().find(step => !step.disabled)?.value ?? 0,
+        {set: value => this.selectedStep.set(value)}
+    );
 
     /**
      * Whether the component is disabled
@@ -213,7 +219,7 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
         }
 
         const previousStep = this.activeStep();
-        this.activeStep.set(stepValue);
+        this.selectedStep.set(stepValue);
         this.propagateChange(stepValue);
         this.stepChange.emit({
             previousStep,
@@ -268,6 +274,8 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
      * Handle finish action on the last step
      */
     onFinish(): void {
+        if (this.isDisabled() || !this.isLastStep()) return;
+        this.propagateTouched();
         this.complete.emit();
     }
 
@@ -299,10 +307,8 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
 
     // ControlValueAccessor implementation
 
-    writeValue(value: number): void {
-        if (value !== undefined && value !== null) {
-            this.activeStep.set(value);
-        }
+    writeValue(value: number | null | undefined): void {
+        this.selectedStep.set(value ?? null);
     }
 
     registerOnChange(fn: (value: number) => void): void {
@@ -317,7 +323,8 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
         this.isDisabled.set(isDisabled);
     }
 
-    onBlur(): void {
+    onBlur(event?: FocusEvent): void {
+        if (event && (event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) return;
         this.propagateTouched();
     }
 }

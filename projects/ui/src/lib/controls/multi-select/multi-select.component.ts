@@ -8,8 +8,9 @@ import {
   model,
   output
 } from '@angular/core';
-import {MultiSelect, MultiSelectPassThrough} from "primeng/multiselect";
-import {PassThroughOption} from 'primeng/api';
+import {MultiSelect} from "@openng/optimus-ui/multiselect";
+import type {MultiSelectPassThrough} from "@openng/optimus-ui/types/multiselect";
+import {PassThroughOption} from '@openng/optimus-ui/api';
 import {FormControl, ReactiveFormsModule} from "@angular/forms";
 import {FormValueControl} from "@angular/forms/signals";
 import {ControlItemInterface, Value} from '../../types';
@@ -41,7 +42,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
         'aria-describedby': this.formField?.describedBy(this.ariaDescribedBy()) ?? this.ariaDescribedBy(),
         'aria-invalid': this.formField ? this.formField.hasError() : this.ariaInvalid()
     }));
-    // shortcut: PrimeNG 21 omits its runtime hiddenInput PT key from types; remove the extension when declared upstream.
+    // ponytail: OptimusUI 2.0.2 omits its runtime hiddenInput PT key from types; remove the extension when declared upstream.
     protected readonly passThrough = computed<MultiSelectPassThrough & {hiddenInput: PassThroughOption<HTMLInputElement>}>(() => ({hiddenInput: this.inputAria()}));
 
 
@@ -66,6 +67,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
   public changed = output<Value[]>();
   public value = model<Value[]>([]);
   public touched = model<boolean>(false);
+  public readonly touch = output<void>();
   protected readonly multiSelectControl = new FormControl<Value[]>([], {nonNullable: true});
   protected readonly selectedItems = computed(() => {
     const suffix = this.selectedItemsLabel()?.trim();
@@ -92,6 +94,7 @@ export class MultiSelectComponent implements FormValueControl<Value[]> {
 
   onBlur(): void {
     this.touched.set(true);
+    this.touch.emit();
   }
 
   onChanged(event: { value: Value[] }): void {

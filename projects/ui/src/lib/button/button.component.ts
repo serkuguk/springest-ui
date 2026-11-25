@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
-import {ButtonModule} from "primeng/button";
+import {ButtonModule} from "@openng/optimus-ui/button";
 
 export type ButtonType = 'button' | 'submit';
 export type ButtonSizeType = "small" | "large";
@@ -24,6 +24,10 @@ export class ButtonComponent {
     readonly disabled = input<boolean>(false);
     readonly rounded = input<boolean>(false);
     readonly badgeSeverity = input<badgeSeverityType>('warn');
+    protected readonly effectiveBadgeSeverity = computed(() => {
+        const severity = this.badgeSeverity();
+        return severity === 'help' ? 'info' : severity === 'primary' ? null : severity;
+    });
     readonly size = input<ButtonSizeType>('small');
     readonly loading = input<boolean>(false);
     readonly aria = input<Record<string, string | number | boolean>>({});
