@@ -85,7 +85,7 @@
         >
           <div class="button-cell">
             @if (editingRow() !== rowData) {
-              <app-button (click)="$event.stopPropagation(); startEdit(rowData, rowIndex)" [aria]="{'aria-label': 'Edit row'}"
+              <app-button (click)="$event.stopPropagation(); startEdit(rowData, rowIndex)" [aria]="{'aria-label': rowActionLabel('EDIT_ROW')}"
                           [iconPos]="'left'"
                           [icon]="'pi pi-pencil'"
                           [disabled]="editingRow() === rowData"
@@ -93,12 +93,12 @@
             }
 
             @if (editingRow() === rowData) {
-              <app-button (click)="$event.stopPropagation(); confirmEdit(rowData)" [aria]="{'aria-label': 'Save row'}"
+              <app-button (click)="$event.stopPropagation(); confirmEdit(rowData)" [aria]="{'aria-label': rowActionLabel('SAVE_ROW')}"
                           [iconPos]="'left'"
                           [icon]="'pi pi-check'"
               ></app-button>
               <app-button
-                   (click)="$event.stopPropagation(); cancelEdit(rowData)" [aria]="{'aria-label': 'Cancel editing'}"
+                   (click)="$event.stopPropagation(); cancelEdit(rowData)" [aria]="{'aria-label': rowActionLabel('CANCEL_EDITING')}"
                    [iconPos]="'left'"
                    [icon]="'pi pi-times'"
               ></app-button>
@@ -112,16 +112,16 @@
   <ng-template #customCell let-rowData="$implicit" let-col="col">
     @switch (col.type) {
       @case ('datetime') {
-        <span>{{ rowData[col.field] | date:'dd-MM-yyyy HH:mm' }}</span>
+        <span>{{ rowData[col.field] | tableDate:'dd-MM-yyyy HH:mm' }}</span>
       }
       @case ('date-mes') {
-        <span>{{ rowData[col.field] | date:'MM-yyyy' }}</span>
+        <span>{{ rowData[col.field] | tableDate:'MM-yyyy' }}</span>
       }
       @case ('date') {
         <span>{{ rowData[col.field] }}</span>
       }
       @case ('date-reverse') {
-        <span>{{ rowData[col.field] | date:'yyyy-MM-dd' }}</span>
+        <span>{{ rowData[col.field] | tableDate:'yyyy-MM-dd' }}</span>
       }
       @case ('decimal') {
         <span>{{ rowData[col.field] }}</span>

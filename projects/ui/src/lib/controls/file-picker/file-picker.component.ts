@@ -1,5 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, model, output, viewChild} from '@angular/core';
 import {FormValueControl} from '@angular/forms/signals';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {TranslateService} from '@ngx-translate/core';
 import {ButtonComponent} from '../../button/button.component';
 import {FormFieldComponent} from '../form-field/form-field.component';
 
@@ -9,22 +11,24 @@ let nextId = 0;
     selector: 'app-file-picker',
     standalone: true,
     imports: [ButtonComponent],
-    template: `
-        @if (label()) { <label [for]="id()">{{ label() }}</label> }
-        <input #picker type="file" [id]="id()" [accept]="accept()" [multiple]="multiple()"
-            [disabled]="disabled() || readonly()" [attr.aria-readonly]="readonly()"
-            [attr.aria-label]="ariaLabel()" [attr.aria-labelledby]="labelledBy()"
-            [attr.aria-describedby]="describedBy()" [attr.aria-invalid]="effectiveInvalid()"
-            (change)="onFileChange($event)" (blur)="touched.set(true); touch.emit()" />
-        @if (value().length) {
-            <ul>@for (file of value(); track $index) { <li>{{ file.name }}</li> }</ul>
-            <app-button label="Clear files" [disabled]="disabled() || readonly()" (click)="clear()" />
+    templateUrl: './file-picker.component.html',
+    styles: [`
+        :host {
+            display: block;
         }
-    `,
-    styles: [`:host { display: block; } label { display: block; }`],
+        label {
+            display: block;
+        }
+    `],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilePickerComponent implements FormValueControl<File[]> {
+    private readonly translate = inject(TranslateService, {optional: true});
+    private readonly clearTranslation = this.translate ? toSignal(this.translate.stream('FILE_PICKER.CLEAR_FILES')) : undefined;
+    protected readonly clearLabel = computed(() => {
+        const translated = this.clearTranslation?.();
+        return translated && translated !== 'FILE_PICKER.CLEAR_FILES' ? translated : 'Clear files';
+    });
     protected readonly field = inject(FormFieldComponent, {optional: true});
     protected readonly picker = viewChild<ElementRef<HTMLInputElement>>('picker');
     readonly inputId = input(`app-file-picker-${nextId++}`);

@@ -1,6 +1,6 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideTranslateService} from '@ngx-translate/core';
-import {TableComponent, TableRow} from './table.component';
+import {provideTranslateService, TranslateService} from '@ngx-translate/core';
+import {TableColumn, TableComponent, TableRow} from './table.component';
 
 describe('TableComponent', () => {
   let fixture: ComponentFixture<TableComponent>;
@@ -25,6 +25,22 @@ describe('TableComponent', () => {
     expect(headers[0].hidden).toBe(false);
     expect(headers[2].hidden).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('2025-12-31');
+  });
+
+  it('renders valid dates and a dash for missing or unformattable dates in every formatted column', () => {
+    const types: TableColumn['type'][] = ['datetime', 'date-mes', 'date-reverse'];
+    const timestamp = String(new Date(2025, 11, 31).getTime());
+    const invalidDates = [null, undefined, '', ' ', 'bad', new Date(NaN), Infinity, '8640000000000001'];
+    fixture.componentRef.setInput('dataSourceColumns', types.map(type => ({field: 'date', header: 'Date', type})));
+    fixture.componentRef.setInput('dataSource', ['2025-12-31', timestamp, ...invalidDates].map(date => ({date})));
+    fixture.componentRef.setInput('showRowActions', false);
+    fixture.detectChanges();
+
+    const validCells = ['31-12-2025 00:00', '12-2025', '2025-12-31'];
+    const cells = fixture.nativeElement.querySelectorAll('tbody td') as NodeListOf<HTMLTableCellElement>;
+    expect(Array.from(cells, cell => cell.textContent?.trim())).toEqual([
+      ...validCells, ...validCells, ...invalidDates.flatMap(() => types.map(() => '—')),
+    ]);
   });
 
   it('sorts its own array, retains row identities and leaves input untouched', () => {
@@ -114,5 +130,26 @@ describe('TableComponent', () => {
     const second = TestBed.createComponent(TableComponent);
     expect(second.componentInstance.actionsId).not.toBe(component.actionsId);
     second.destroy();
+  });
+
+  it('translates row action accessible names on language changes and falls back for missing keys', () => {
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', {TABLE: {EDIT_ROW: 'Edit', SAVE_ROW: 'Save', CANCEL_EDITING: 'Cancel'}});
+    translate.setTranslation('es', {TABLE: {EDIT_ROW: 'Editar fila', SAVE_ROW: 'Guardar fila', CANCEL_EDITING: 'Cancelar edición'}});
+    for (const [language, edit, save, cancel] of [
+      ['en', 'Edit', 'Save', 'Cancel'],
+      ['es', 'Editar fila', 'Guardar fila', 'Cancelar edición'],
+      ['missing', 'Edit row', 'Save row', 'Cancel editing'],
+    ]) {
+      translate.setTranslation('missing', {});
+      translate.use(language);
+      component.cancelEdit();
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector(`button[aria-label="${edit}"]`)).toBeTruthy();
+      component.startEdit(rows[0]);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector(`button[aria-label="${save}"]`)).toBeTruthy();
+      expect(fixture.nativeElement.querySelector(`button[aria-label="${cancel}"]`)).toBeTruthy();
+    }
   });
 });

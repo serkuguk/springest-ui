@@ -4,15 +4,19 @@ import {
     Component,
     computed,
     ContentChild, effect,
+    inject,
     input,
     output,
+    Pipe,
+    PipeTransform,
     signal,
     TemplateRef,
     ViewChild,
     viewChild
 } from '@angular/core';
 import {Table, TableModule} from "@openng/optimus-ui/table";
-import {TranslatePipe} from "@ngx-translate/core";
+import {TranslatePipe, TranslateService} from "@ngx-translate/core";
+import {toSignal} from '@angular/core/rxjs-interop';
 import {DatePipe, NgTemplateOutlet} from "@angular/common";
 import {ButtonComponent} from '../button/button.component';
 import {Tooltip} from '@openng/optimus-ui/tooltip';
@@ -55,6 +59,21 @@ export interface TableRow {
     _originalData?: any;
 }
 
+@Pipe({name: 'tableDate'})
+class TableDatePipe implements PipeTransform {
+    private readonly date = inject(DatePipe);
+
+    transform(value: string | number | Date | null | undefined, format: string): string {
+        try {
+            const formatted = this.date.transform(value, format);
+            // ponytail: DatePipe emits NaN for out-of-range timestamps in these numeric formats.
+            return formatted && !formatted.includes('NaN') ? formatted : '—';
+        } catch {
+            return '—';
+        }
+    }
+}
+
 @Component({
     selector: 'app-table',
     standalone: true,
@@ -63,17 +82,30 @@ export interface TableRow {
         Tooltip,
         TranslatePipe,
         NgTemplateOutlet,
-        DatePipe,
+        TableDatePipe,
         ButtonComponent,
         FormFieldComponent,
         BasicInputComponent,
         FormField
     ],
+    providers: [DatePipe],
     templateUrl: './table.component.html',
     styleUrl: './table.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent {
+    private readonly translate = inject(TranslateService, {optional: true});
+    private readonly rowActionTranslations = this.translate ? toSignal(this.translate.stream([
+        'TABLE.EDIT_ROW', 'TABLE.SAVE_ROW', 'TABLE.CANCEL_EDITING'
+    ]), {initialValue: {}}) : undefined;
+
+    protected rowActionLabel(action: 'EDIT_ROW' | 'SAVE_ROW' | 'CANCEL_EDITING'): string {
+        const key = `TABLE.${action}`;
+        const translated = this.rowActionTranslations?.()[key];
+        return translated && translated !== key ? translated : {
+            EDIT_ROW: 'Edit row', SAVE_ROW: 'Save row', CANCEL_EDITING: 'Cancel editing'
+        }[action];
+    }
 
     private readonly editor = viewChild(BasicInputComponent);
     rows = 10;

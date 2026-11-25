@@ -1,0 +1,16 @@
+@if (label()) {
+    <label [for]="id()">{{ label() }}</label>
+}
+<input #picker type="file" [id]="id()" [accept]="accept()" [multiple]="multiple()"
+    [disabled]="disabled() || readonly()" [attr.aria-readonly]="readonly()"
+    [attr.aria-label]="ariaLabel()" [attr.aria-labelledby]="labelledBy()"
+    [attr.aria-describedby]="describedBy()" [attr.aria-invalid]="effectiveInvalid()"
+    (change)="onFileChange($event)" (blur)="touched.set(true); touch.emit()" />
+@if (value().length) {
+    <ul>
+        @for (file of value(); track $index) {
+            <li>{{ file.name }}</li>
+        }
+    </ul>
+    <app-button [label]="clearLabel()" [disabled]="disabled() || readonly()" (click)="clear()" />
+}

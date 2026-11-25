@@ -143,6 +143,8 @@ Import `FilePickerComponent`, `ToggleComponent`, and `SegmentedControlComponent`
 
 FilePicker selects local files and displays their names. Default selection is a single file; clearing or resetting to `[]` also clears the native picker, allowing the same file to be selected again. Cancelling the picker preserves the current selection. `accept` is a browser hint; validate files before upload in your application.
 
+Set `FILE_PICKER.CLEAR_FILES` in the application's ngx-translate catalog to translate the clear button. The default label is “Clear files”, including in apps without a translation provider.
+
 SegmentedControl selects one scalar value and defaults to `variant="segments"`. `allowEmpty` defaults to false, so clicking the selected item keeps it selected. Cards use the same keyboard behavior and can project `#item` with `$implicit: ControlItemInterface` and `selected: boolean` (`SegmentedControlItemContext`). Readonly disables interaction in Toggle and SegmentedControl.
 
 ## Buttons, dialog and pagination
@@ -173,7 +175,7 @@ Pagination defaults to `first = 0`, `rows = 10`, and `totalRecords = 0`. `first`
 
 ## Development checks
 
-Run `pnpm build` and `pnpm check:ui`. The latter checks strict Angular consumer templates and all component/integration tests, including Table, Stepper, Avatar, Charts, InputNumber and Toast. `pnpm check:toast` remains available. The existing runner reuses Jest from the sibling `../angular-core` checkout; it must be present. Select individual specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
+From the repository root, run `pnpm install --frozen-lockfile`, `pnpm build` and `pnpm check:ui`. The last command compiles the strict Angular consumer templates and runs every UI spec with the repository's Jest installation. Run `pnpm check:toast` for Toast or select specs with `node scripts/check-toast.cjs "projects/ui/src/lib/button/*.spec.ts"`.
 
 ## Toast
 
@@ -310,6 +312,8 @@ Toast continues to use ToastComponent and ToastService as documented above.
 
 Import TableComponent and configure `provideTranslateService()` from `@ngx-translate/core`
 at the application root; table headers and tooltip messages use its translation pipe.
+Set `TABLE.EDIT_ROW`, `TABLE.SAVE_ROW` and `TABLE.CANCEL_EDITING` in the application catalog for
+the accessible names of the editing buttons. Missing keys use the English names.
 
 Columns are visible unless visible is false. Editing uses editableFieldName, or the first
 column marked modificable. Only that cell is edited; empty values cannot be saved.
@@ -317,13 +321,8 @@ Activate the edit button/cell to focus the editor. Enter saves and Escape cancel
 rowUpdate contains the original row object, field and new string value; the application applies
 the update. Sorting and editing never change input rows. Editing preserves the current page
 and is cancelled if its row object is removed or replaced.
-Empty values and invalid dates sort last in either direction. Date-reverse displays yyyy-MM-dd.
-
-### Full verification
-
-`pnpm check:ui` runs every spec, including Table, Stepper, Avatar, Charts and InputNumber,
-plus strict Angular consumer-template compilation. It still reuses Jest from the sibling
-angular-core checkout; that checkout must be installed. No new test dependency is required.
+Empty values and invalid dates sort last in either direction. The `datetime`, `date-mes`
+and `date-reverse` columns display a dash for empty or unformattable values.
 
 ## License
 

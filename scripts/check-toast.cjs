@@ -1,18 +1,12 @@
 const path = require('node:path');
-const { createRequire } = require('node:module');
 const fs = require('node:fs');
 const { spawnSync } = require('node:child_process');
+const { createCjsPreset } = require('jest-preset-angular/presets');
+const { runCLI } = require('jest');
 
-// ponytail: reuse angular-core's installed Jest; add a library test runner when tests need to run independently.
-const consumerRoot = path.resolve(__dirname, '../../angular-core');
-const consumerRequire = createRequire(path.join(consumerRoot, 'package.json'));
-const { createCjsPreset } = consumerRequire('jest-preset-angular/presets');
-const { runCLI } = consumerRequire('jest');
 const rootDir = path.resolve(__dirname, '..');
 const patterns = process.argv.includes('--ui')
-  ? fs.readdirSync(path.join(rootDir, 'projects/ui/src/lib'), { recursive: true })
-    .filter(file => file.endsWith('.spec.ts'))
-    .map(file => 'projects/ui/src/lib/' + file.replaceAll(path.sep, '/'))
+  ? ['projects/ui/src/lib/**/*.spec.ts']
   : process.argv.slice(2).filter(arg => arg !== '--typecheck');
 if (process.argv.includes('--typecheck')) {
   const configDir = path.join(rootDir, 'out-tsc/check-ui');
@@ -20,7 +14,7 @@ if (process.argv.includes('--typecheck')) {
   const configPath = path.join(configDir, 'tsconfig.json');
   fs.writeFileSync(configPath, JSON.stringify({
     extends: path.join(rootDir, 'tsconfig.json'),
-    compilerOptions: { noEmit: true, types: [path.join(consumerRoot, 'node_modules/@types/jest')] },
+    compilerOptions: { noEmit: true, types: ['jest'] },
     files: [
       'projects/ui/src/lib/controls/controls.integration.spec.ts',
       'projects/ui/src/lib/controls/input-number/input-number.component.spec.ts',
@@ -36,30 +30,16 @@ const preset = createCjsPreset({ tsconfig: {
   target: 'ES2022', module: 'ESNext', moduleResolution: 'bundler',
   experimentalDecorators: true, emitDecoratorMetadata: true,
   esModuleInterop: true, skipLibCheck: true,
-  types: [path.join(consumerRoot, 'node_modules/@types/jest')],
+  types: ['jest'],
 } });
 const config = {
   ...preset,
-  testEnvironment: consumerRequire.resolve('jest-environment-jsdom'),
-  snapshotSerializers: preset.snapshotSerializers.map(name => consumerRequire.resolve(name)),
-  transform: Object.fromEntries(Object.entries(preset.transform).map(([pattern, [name, options]]) =>
-    [pattern, [consumerRequire.resolve(name), options]])),
   rootDir,
-  setupFilesAfterEnv: [path.join(consumerRoot, 'src/setup.jest.ts')],
+  setupFilesAfterEnv: ['<rootDir>/scripts/setup.jest.ts'],
   testMatch: patterns.length
-    ? patterns.map(pattern => `<rootDir>/${pattern}`)
-    : ['<rootDir>/projects/ui/src/lib/toast/toast.component.spec.ts'],
-  modulePathIgnorePatterns: ['<rootDir>/dist/'],
-  modulePaths: [path.join(consumerRoot, 'node_modules')],
-  moduleNameMapper: Object.fromEntries(
-    ['core', 'common', 'compiler', 'platform-browser', 'forms', 'router'].flatMap(name => {
-      const packageName = `@angular/${name}`;
-      return Object.keys(require(`${packageName}/package.json`).exports).filter(entry => !entry.includes('*')).map(entry => {
-        const specifier = packageName + (entry === '.' ? '' : entry.slice(1));
-        return [`^${specifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, require.resolve(specifier)];
-      });
-    }),
-  ),
+    ? patterns.map(pattern => `**/${pattern}`)
+    : ['**/projects/ui/src/lib/toast/toast.component.spec.ts'],
+  modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/out-tsc/'],
 };
 
 runCLI({ config: JSON.stringify(config), runInBand: true }, [rootDir])

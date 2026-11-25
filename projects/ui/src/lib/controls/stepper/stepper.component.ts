@@ -4,6 +4,7 @@ import {
     ContentChildren,
     forwardRef,
     input,
+    linkedSignal,
     output,
     QueryList,
     signal,
@@ -149,7 +150,11 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
     /**
      * Current active step value (signal-based state)
      */
-    public activeStep = signal<number>(0);
+    private readonly selectedStep = signal<number | null>(null);
+    public activeStep = linkedSignal(
+        () => this.selectedStep() ?? this.steps().find(step => !step.disabled)?.value ?? 0,
+        {set: value => this.selectedStep.set(value)}
+    );
 
     /**
      * Whether the component is disabled
@@ -214,7 +219,7 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
         }
 
         const previousStep = this.activeStep();
-        this.activeStep.set(stepValue);
+        this.selectedStep.set(stepValue);
         this.propagateChange(stepValue);
         this.stepChange.emit({
             previousStep,
@@ -302,10 +307,8 @@ export class StepperControlComponent implements ControlValueAccessor, AfterConte
 
     // ControlValueAccessor implementation
 
-    writeValue(value: number): void {
-        if (value !== undefined && value !== null) {
-            this.activeStep.set(value);
-        }
+    writeValue(value: number | null | undefined): void {
+        this.selectedStep.set(value ?? null);
     }
 
     registerOnChange(fn: (value: number) => void): void {
